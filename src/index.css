@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-heading: 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: #FFFDF9;
+    color: #1E293B;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-candy {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Candy sprinkle background pattern */
+.bg-candy-pattern {
+  background-color: #FFFDF9;
+  background-image: 
+    radial-gradient(#F472B6 1.2px, transparent 1.2px),
+    radial-gradient(#34D399 1.2px, #FFFDF9 1.2px);
+  background-size: 52px 52px;
+  background-position: 0 0, 26px 26px;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}

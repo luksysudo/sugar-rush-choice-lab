@@ -1,0 +1,6 @@
+{
+  "name": "Sugar Rush: Choice Lab - Kaidah Pencacahan SMA Kelas 12",
+  "description": "Aplikasi pembelajaran matematika interaktif Kaidah Pencacahan SMA Kelas 12 bertema Candy Arcade bersama Vanellope.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
