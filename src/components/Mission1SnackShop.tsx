@@ -417,7 +417,7 @@ export const Mission1SnackShop: React.FC<Mission1Props> = ({
                   <p className="text-xs sm:text-sm text-emerald-800/90 leading-relaxed">
                     <strong>Rangkuman Pembelajaran:</strong>
                     <br />• <em>Tantangan 1 (Kata hubung ATAU / Saling Lepas):</em> Aturan Penjumlahan = 4 + 3 + 2 = 9 pilihan.
-                    <br />• <em>Tantangan 2 (Kata hubung DAN / Berpasangan):</em> Aturan Perkalian = 4 × 3 = 12 pasangan.
+                    <br />• <em>Tantangan 2 (Kata hubung DAN / Berpasangan):</em> Aturan Perkalian = 4 × 3 = 12 pasangan. Pasangan ini juga dapat dipetakan pada <strong>Tabel Silang (4 baris × 3 kolom = 12 sel)</strong> maupun <strong>Diagram Pohon (4 cabang × 3 cabang)</strong>!
                   </p>
                   <div className="pt-2 flex justify-end">
                     <button

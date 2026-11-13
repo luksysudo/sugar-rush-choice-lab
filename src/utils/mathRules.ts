@@ -214,6 +214,18 @@ export interface QuizQuestion {
   explanation: string;
 }
 
+export function shuffleQuizQuestions<T>(
+  questions: readonly T[],
+  rng: () => number = Math.random
+): T[] {
+  const copy = [...questions];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 export function scoreQuiz(userAnswers: Record<number, string>, questions: QuizQuestion[]): {
   score: number;
   correctCount: number;

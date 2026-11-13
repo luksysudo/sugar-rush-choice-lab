@@ -13,6 +13,7 @@ import {
   verifyFoodGoTantangan2Subtotals,
   verifyFoodGoTantangan2Total,
   scoreQuiz,
+  shuffleQuizQuestions,
   getMathMotivationQuote,
   formatJamMengerjakan,
   formatDurationShort,
@@ -166,6 +167,31 @@ test('10 Soal Kuis Evaluasi: Semua jawaban < 100 dan penilaian 100%', () => {
   const partialResult = scoreQuiz({ 1: 'A', 2: 'B' }, QUIZ_QUESTIONS);
   assert.equal(partialResult.score, 20);
   assert.equal(partialResult.correctCount, 2);
+
+  // Shuffling preserves all 10 IDs without mutating original array
+  let seed = 0.37;
+  const deterministicRng = () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+  const shuffled = shuffleQuizQuestions(QUIZ_QUESTIONS, deterministicRng);
+  assert.equal(shuffled.length, 10);
+  assert.deepEqual(
+    shuffled.map((q) => q.id).sort((a, b) => a - b),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  );
+  assert.notDeepEqual(
+    shuffled.map((q) => q.id),
+    QUIZ_QUESTIONS.map((q) => q.id)
+  );
+
+  // Every quiz item must have valid ruleType, conceptual feedback, and no mission-name spoiler in question text
+  QUIZ_QUESTIONS.forEach((q) => {
+    assert.ok(q.ruleType === 'penjumlahan' || q.ruleType === 'perkalian');
+    assert.ok(q.conceptFeedbackCorrect.startsWith('Benar!'), `Soal ${q.id} feedback benar harus diawali 'Benar!'`);
+    assert.ok(q.conceptFeedbackIncorrect.startsWith('Kurang tepat.'), `Soal ${q.id} feedback salah harus diawali 'Kurang tepat.'`);
+    assert.equal(/misi\s*\d+|pos\s*\d+/i.test(q.question), false, `Soal ${q.id} tidak boleh menyebut nama misi/pos`);
+  });
 });
 
 test('Quote Motivasi & Format Payload Google Sheets', () => {

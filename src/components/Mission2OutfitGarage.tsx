@@ -867,7 +867,7 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
                   <p className="text-xs sm:text-sm text-emerald-800/90 leading-relaxed">
                     <strong>Rangkuman Pembelajaran:</strong>
                     <br />• <em>Tantangan 1:</em> Berhasil mengklasifikasikan kejadian saling lepas ("ATAU" ➔ Penjumlahan) dan kejadian berpasangan ("DAN" ➔ Perkalian).
-                    <br />• <em>Tantangan 2:</em> Aturan Perkalian kostum: 4 × 3 × 2 = 24 kombinasi.
+                    <br />• <em>Tantangan 2:</em> Aturan Perkalian kostum: 4 × 3 × 2 = 24 kombinasi. Untuk 3 tahap pemilihan sekaligus seperti ini, kamu dapat melacak setiap kombinasinya menggunakan <strong>Diagram Pohon 3 tingkat</strong> (atau perluasan <strong>Tabel Silang</strong>)!
                   </p>
                   <div className="pt-2 flex justify-end">
                     <button

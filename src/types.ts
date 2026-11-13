@@ -31,8 +31,11 @@ export interface LeaderboardEntry {
 export interface QuizQuestionItem {
   id: number;
   topic: string;
+  ruleType: 'penjumlahan' | 'perkalian';
   question: string;
   options: { key: string; text: string }[];
   correctAnswer: string;
+  conceptFeedbackCorrect: string;
+  conceptFeedbackIncorrect: string;
   explanation: string;
 }

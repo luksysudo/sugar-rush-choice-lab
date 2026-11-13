@@ -24,7 +24,7 @@ import {
   Loader2,
   Send,
 } from 'lucide-react';
-import { StudentProfile, LeaderboardEntry } from '../types';
+import { StudentProfile, LeaderboardEntry, QuizQuestionItem } from '../types';
 import { QUIZ_QUESTIONS } from '../data/quizData';
 import {
   GOOGLE_SHEET_WEBAPP_URL,
@@ -37,6 +37,7 @@ import {
 import { VanellopeGuide } from './VanellopeGuide';
 import {
   scoreQuiz,
+  shuffleQuizQuestions,
   getMathMotivationQuote,
   formatJamMengerjakan,
   formatDurationShort,
@@ -58,7 +59,10 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
   adventureStartTime = null,
   onBackToMap,
 }) => {
-  // Quiz State
+  // Quiz State (soal diacak setiap sesi tanpa label aturan/misi)
+  const [orderedQuestions, setOrderedQuestions] = useState<QuizQuestionItem[]>(() =>
+    shuffleQuizQuestions(QUIZ_QUESTIONS)
+  );
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [selectedOptionForCurrent, setSelectedOptionForCurrent] = useState<string | null>(null);
@@ -133,7 +137,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
     }
   };
 
-  const currentQ = QUIZ_QUESTIONS[currentQuestionIndex];
+  const currentQ = orderedQuestions[currentQuestionIndex];
 
   const handleSelectOption = (key: string) => {
     if (isAnswerLocked) return;
@@ -146,9 +150,9 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestionIndex < QUIZ_QUESTIONS.length - 1) {
+    if (currentQuestionIndex < orderedQuestions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
-      const nextQId = QUIZ_QUESTIONS[currentQuestionIndex + 1].id;
+      const nextQId = orderedQuestions[currentQuestionIndex + 1].id;
       setSelectedOptionForCurrent(userAnswers[nextQId] || null);
       setIsAnswerLocked(!!userAnswers[nextQId]);
     } else {
@@ -267,6 +271,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
   };
 
   const handleRetakeQuiz = () => {
+    setOrderedQuestions(shuffleQuizQuestions(QUIZ_QUESTIONS));
     setCurrentQuestionIndex(0);
     setUserAnswers({});
     setSelectedOptionForCurrent(null);
@@ -356,7 +361,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                   </div>
                 </div>
                 <div className="px-3.5 py-1 bg-emerald-100 text-emerald-800 rounded-full font-mono text-xs sm:text-sm font-extrabold">
-                  {currentQuestionIndex + 1} of {QUIZ_QUESTIONS.length}
+                  {currentQuestionIndex + 1} of {orderedQuestions.length}
                 </div>
               </div>
 
@@ -365,14 +370,14 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 size="sm"
                 dialogue={
                   <span>
-                    "Uji pemahamanmu secara mandiri tanpa hint! Pilihlah satu opsi jawaban yang paling tepat. Pilihanmu langsung <strong>terkunci</strong> saat diklik!"
+                    "Uji pemahamanmu secara mandiri! Identifikasi apakah soal meminta <strong>memilih satu alternatif</strong> atau <strong>menyusun pilihan bertahap</strong>. Pilihanmu langsung <strong>terkunci</strong> saat diklik!"
                   </span>
                 }
               />
 
-              <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-slate-200">
+              <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-slate-200" data-testid="active-quiz-question-card">
                 <span className="inline-block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-                  Soal #{currentQuestionIndex + 1} • {currentQ.topic}
+                  Soal #{currentQuestionIndex + 1} dari {orderedQuestions.length}
                 </span>
                 <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">
                   {currentQ.question}
@@ -382,6 +387,9 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
               <div className="space-y-3">
                 {currentQ.options.map((opt) => {
                   const isSelected = selectedOptionForCurrent === opt.key;
+                  const isSelectionCorrect = isSelected && opt.key === currentQ.correctAnswer;
+                  const isSelectionWrong = isSelected && opt.key !== currentQ.correctAnswer;
+
                   return (
                     <button
                       key={opt.key}
@@ -389,8 +397,10 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                       disabled={isAnswerLocked}
                       onClick={() => handleSelectOption(opt.key)}
                       className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between text-left ${
-                        isSelected
-                          ? 'border-emerald-500 bg-emerald-50/70 text-slate-900 shadow-sm ring-2 ring-emerald-300/40'
+                        isSelectionCorrect
+                          ? 'border-emerald-500 bg-emerald-50/80 text-slate-900 shadow-sm ring-2 ring-emerald-300/40'
+                          : isSelectionWrong
+                          ? 'border-rose-400 bg-rose-50/80 text-slate-900 shadow-sm ring-2 ring-rose-300/40'
                           : isAnswerLocked
                           ? 'border-slate-200 bg-slate-50/60 text-slate-500 cursor-not-allowed'
                           : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800'
@@ -399,8 +409,10 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                       <div className="flex items-center gap-3">
                         <span
                           className={`w-7 h-7 rounded-xl font-mono text-xs font-bold flex items-center justify-center shrink-0 ${
-                            isSelected
+                            isSelectionCorrect
                               ? 'bg-emerald-600 text-white'
+                              : isSelectionWrong
+                              ? 'bg-rose-600 text-white'
                               : 'bg-slate-200 text-slate-700'
                           }`}
                         >
@@ -409,9 +421,14 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                         <span className="text-xs sm:text-sm font-semibold">{opt.text}</span>
                       </div>
 
-                      {isSelected && (
+                      {isSelectionCorrect && (
                         <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
-                          Terkunci ✓
+                          Benar ✓
+                        </span>
+                      )}
+                      {isSelectionWrong && (
+                        <span className="text-xs font-bold text-rose-700 bg-rose-100 px-2.5 py-0.5 rounded-full">
+                          Kurang Tepat ✕
                         </span>
                       )}
                     </button>
@@ -419,12 +436,47 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 })}
               </div>
 
+              {/* Pembahasan Konseptual Otomatis (1-2 kalimat) setelah siswa menjawab */}
+              {isAnswerLocked && selectedOptionForCurrent && (() => {
+                const isCorrectPick = selectedOptionForCurrent === currentQ.correctAnswer;
+                return (
+                  <div
+                    data-testid="quiz-conceptual-feedback"
+                    className={`p-4 rounded-2xl border-2 flex items-start gap-3 text-xs sm:text-sm leading-relaxed ${
+                      isCorrectPick
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+                        : 'bg-amber-50 border-amber-300 text-amber-950'
+                    }`}
+                  >
+                    {isCorrectPick ? (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <XCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                    )}
+                    <div className="space-y-0.5">
+                      <div
+                        className={`text-[11px] font-extrabold uppercase tracking-wide ${
+                          isCorrectPick ? 'text-emerald-800' : 'text-amber-900'
+                        }`}
+                      >
+                        Pembahasan Konseptual
+                      </div>
+                      <p className="font-medium">
+                        {isCorrectPick
+                          ? currentQ.conceptFeedbackCorrect
+                          : currentQ.conceptFeedbackIncorrect}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span className="text-xs text-slate-500 italic">
                   {isAnswerLocked
-                    ? currentQuestionIndex === QUIZ_QUESTIONS.length - 1
+                    ? currentQuestionIndex === orderedQuestions.length - 1
                       ? 'Jawaban soal terakhir terkunci. Tekan Selesai / Kirim Nilai.'
-                      : 'Jawaban terkunci. Klik SELANJUTNYA untuk lanjut.'
+                      : 'Baca pembahasan konseptual di atas, lalu klik SELANJUTNYA.'
                     : 'Pilih salah satu jawaban di atas untuk mengunci opsi'}
                 </span>
 
@@ -439,7 +491,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                   }`}
                 >
                   <span>
-                    {currentQuestionIndex === QUIZ_QUESTIONS.length - 1
+                    {currentQuestionIndex === orderedQuestions.length - 1
                       ? 'Selesai / Kirim Nilai'
                       : 'SELANJUTNYA'}
                   </span>
@@ -580,7 +632,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 </div>
 
                 <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
-                  {QUIZ_QUESTIONS.map((q, idx) => {
+                  {orderedQuestions.map((q, idx) => {
                     const userPick = userAnswers[q.id];
                     const isCorrectAnswer = userPick === q.correctAnswer;
                     return (

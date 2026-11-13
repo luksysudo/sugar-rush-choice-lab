@@ -191,6 +191,183 @@ export const PrerequisiteModal: React.FC<PrerequisiteModalProps> = ({
                     Total Cara = n₁ × n₂ × n₃ × ... × nₖ
                   </div>
                 </div>
+
+                <div>
+                  <h5 className="text-xs font-bold text-sky-900 uppercase tracking-wide mb-1.5">
+                    c. Representasi Visual Kombinasi (Tabel Silang &amp; Diagram Pohon):
+                  </h5>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-3">
+                    Kombinasi kejadian berurutan dengan aturan perkalian (misalnya 2 pilihan tahap pertama <strong>A₁, A₂</strong> dan 3 pilihan tahap kedua <strong>B₁, B₂, B₃</strong>) dapat dipetakan secara sistematis melalui dua bentuk visual berikut:
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 items-stretch" data-testid="buku-materi-visual-representations">
+                    {/* Left Card: Tabel Silang (Baris x Kolom) */}
+                    <div
+                      data-testid="tabel-silang-card"
+                      className="bg-white border-2 border-sky-200 rounded-xl p-3.5 shadow-2xs flex flex-col justify-between gap-2.5"
+                    >
+                      <div className="space-y-1">
+                        <div className="text-[11px] font-extrabold text-sky-900 uppercase tracking-wide">
+                          1. Tabel Silang (Baris × Kolom)
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          Memetakan pasangan 2 tahap pilihan pada sel pertemuan baris dan kolom.
+                        </p>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-[11px] font-mono border-collapse text-center">
+                          <thead>
+                            <tr className="bg-sky-100 text-sky-950">
+                              <th className="border border-sky-200 px-2 py-1.5 font-extrabold">
+                                P₁ \ P₂
+                              </th>
+                              <th className="border border-sky-200 px-2 py-1.5 font-bold">B₁</th>
+                              <th className="border border-sky-200 px-2 py-1.5 font-bold">B₂</th>
+                              <th className="border border-sky-200 px-2 py-1.5 font-bold">B₃</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <th className="border border-sky-200 bg-sky-50 px-2 py-1.5 font-extrabold text-sky-900">
+                                A₁
+                              </th>
+                              <td className="border border-sky-200 px-1.5 py-1.5 text-slate-700 font-semibold">
+                                (A₁, B₁)
+                              </td>
+                              <td className="border border-sky-200 px-1.5 py-1.5 text-slate-700 font-semibold">
+                                (A₁, B₂)
+                              </td>
+                              <td className="border border-sky-200 px-1.5 py-1.5 text-slate-700 font-semibold">
+                                (A₁, B₃)
+                              </td>
+                            </tr>
+                            <tr>
+                              <th className="border border-sky-200 bg-sky-50 px-2 py-1.5 font-extrabold text-sky-900">
+                                A₂
+                              </th>
+                              <td className="border border-sky-200 px-1.5 py-1.5 text-slate-700 font-semibold">
+                                (A₂, B₁)
+                              </td>
+                              <td className="border border-sky-200 px-1.5 py-1.5 text-slate-700 font-semibold">
+                                (A₂, B₂)
+                              </td>
+                              <td className="border border-sky-200 px-1.5 py-1.5 text-slate-700 font-semibold">
+                                (A₂, B₃)
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="text-[11px] font-bold text-sky-800 bg-sky-50 border border-sky-200/80 rounded-lg px-2.5 py-1.5 text-center font-mono">
+                        2 baris × 3 kolom = 6 kombinasi
+                      </div>
+                    </div>
+
+                    {/* Right Card: Diagram Pohon */}
+                    <div
+                      data-testid="diagram-pohon-card"
+                      className="bg-white border-2 border-emerald-200 rounded-xl p-3.5 shadow-2xs flex flex-col justify-between gap-2.5"
+                    >
+                      <div className="space-y-1">
+                        <div className="text-[11px] font-extrabold text-emerald-900 uppercase tracking-wide">
+                          2. Diagram Pohon (Tree Diagram)
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          Menelusuri cabang berurutan dari titik awal hingga hasil akhir (efektif untuk ≥ 2 tahap).
+                        </p>
+                      </div>
+
+                      <div className="w-full flex items-center justify-center bg-emerald-50/40 rounded-lg border border-emerald-100 p-2">
+                        <svg
+                          viewBox="0 0 280 150"
+                          className="w-full h-auto max-h-36"
+                          role="img"
+                          aria-label="Diagram Pohon dua tahap menghasilkan 6 kombinasi"
+                        >
+                          {/* Edges Start -> A1, A2 */}
+                          <line x1="42" y1="75" x2="96" y2="38" stroke="#0EA5E9" strokeWidth="2" />
+                          <line x1="42" y1="75" x2="96" y2="112" stroke="#0EA5E9" strokeWidth="2" />
+
+                          {/* Edges A1 -> B1, B2, B3 */}
+                          <line x1="120" y1="38" x2="178" y2="16" stroke="#10B981" strokeWidth="1.8" />
+                          <line x1="120" y1="38" x2="178" y2="38" stroke="#10B981" strokeWidth="1.8" />
+                          <line x1="120" y1="38" x2="178" y2="60" stroke="#10B981" strokeWidth="1.8" />
+
+                          {/* Edges A2 -> B1, B2, B3 */}
+                          <line x1="120" y1="112" x2="178" y2="90" stroke="#10B981" strokeWidth="1.8" />
+                          <line x1="120" y1="112" x2="178" y2="112" stroke="#10B981" strokeWidth="1.8" />
+                          <line x1="120" y1="112" x2="178" y2="134" stroke="#10B981" strokeWidth="1.8" />
+
+                          {/* Start Node */}
+                          <rect x="4" y="62" width="40" height="26" rx="8" fill="#1E293B" />
+                          <text x="24" y="79" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="700">
+                            Mulai
+                          </text>
+
+                          {/* Level 1 Nodes */}
+                          <circle cx="108" cy="38" r="13" fill="#E0F2FE" stroke="#0284C7" strokeWidth="2" />
+                          <text x="108" y="42" textAnchor="middle" fill="#0369A1" fontSize="11" fontWeight="800">
+                            A₁
+                          </text>
+
+                          <circle cx="108" cy="112" r="13" fill="#E0F2FE" stroke="#0284C7" strokeWidth="2" />
+                          <text x="108" y="116" textAnchor="middle" fill="#0369A1" fontSize="11" fontWeight="800">
+                            A₂
+                          </text>
+
+                          {/* Level 2 Nodes & Final Pairs */}
+                          {[
+                            { y: 16, b: 'B₁', pair: '(A₁, B₁)' },
+                            { y: 38, b: 'B₂', pair: '(A₁, B₂)' },
+                            { y: 60, b: 'B₃', pair: '(A₁, B₃)' },
+                            { y: 90, b: 'B₁', pair: '(A₂, B₁)' },
+                            { y: 112, b: 'B₂', pair: '(A₂, B₂)' },
+                            { y: 134, b: 'B₃', pair: '(A₂, B₃)' },
+                          ].map((node, i) => (
+                            <g key={i}>
+                              <rect
+                                x="176"
+                                y={node.y - 9}
+                                width="24"
+                                height="18"
+                                rx="6"
+                                fill="#D1FAE5"
+                                stroke="#059669"
+                                strokeWidth="1.5"
+                              />
+                              <text
+                                x="188"
+                                y={node.y + 4}
+                                textAnchor="middle"
+                                fill="#065F46"
+                                fontSize="9.5"
+                                fontWeight="800"
+                              >
+                                {node.b}
+                              </text>
+                              <text
+                                x="210"
+                                y={node.y + 3.5}
+                                fill="#1E293B"
+                                fontSize="9.5"
+                                fontWeight="700"
+                                fontFamily="monospace"
+                              >
+                                → {node.pair}
+                              </text>
+                            </g>
+                          ))}
+                        </svg>
+                      </div>
+
+                      <div className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 rounded-lg px-2.5 py-1.5 text-center font-mono">
+                        2 cabang × 3 cabang = 6 ujung kombinasi
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
