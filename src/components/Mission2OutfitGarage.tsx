@@ -332,15 +332,16 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
         {/* -------------------- STAGE 2: SIMULASI MANEKIN -------------------- */}
         {currentStage === 2 && (
           <div className="space-y-6">
-            {/* 2-Column Side-by-Side Studio Grid (Left Sticky Mannequin, Right Outfit Options) */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-              {/* Left Column: Sticky FIT-ROOM MANNEQUIN */}
-              <div className="md:col-span-5 md:sticky md:top-16 bg-gradient-to-b from-slate-800 via-slate-800 to-slate-900 rounded-3xl p-5 sm:p-6 border-2 border-slate-700 shadow-xl flex flex-col items-center justify-between text-white relative min-h-[440px] overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none" />
+            {/* 2-Column Side-by-Side Studio Grid (Left Sticky Vanellope Fitting Room, Right Outfit Options) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              {/* Left Column: Sticky VANELLOPE FITTING ROOM */}
+              <div className="md:sticky md:top-16 bg-gradient-to-b from-slate-800 via-slate-800 to-slate-900 rounded-3xl p-5 sm:p-6 border-2 border-slate-700 shadow-xl flex flex-col items-center justify-between text-white relative min-h-[480px] overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-36 bg-pink-500/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-56 h-24 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
 
                 <div className="text-center z-10 w-full flex items-center justify-between px-2">
-                  <span className="text-[11px] font-mono tracking-widest uppercase text-teal-400 font-bold">
-                    FIT-ROOM MANNEQUIN
+                  <span className="text-xs font-mono tracking-widest uppercase text-teal-400 font-extrabold">
+                    VANELLOPE FITTING ROOM
                   </span>
                   <button
                     type="button"
@@ -360,112 +361,333 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
                   </button>
                 </div>
 
-                {/* Mannequin Vector */}
+                {/* Full-Body Illustrated Vanellope Chibi Character with Live Outfit */}
                 <div className="relative my-auto py-3 flex flex-col items-center justify-center">
-                  <svg viewBox="0 0 200 320" className="w-48 h-72 sm:w-56 sm:h-80 drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <ellipse cx="100" cy="45" rx="20" ry="25" fill="#E2E8F0" />
-                    <path d="M96 68 L104 68 L104 80 L96 80 Z" fill="#CBD5E1" />
-                    <path d="M75 80 L125 80 L118 160 L82 160 Z" fill="#CBD5E1" />
+                  <svg viewBox="0 0 240 360" className="w-56 h-80 sm:w-64 sm:h-[340px] drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="fitSkin" x1="120" y1="45" x2="120" y2="130" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#FFF2E8" />
+                        <stop offset="100%" stopColor="#FBDBC6" />
+                      </linearGradient>
+                      <linearGradient id="fitHair" x1="120" y1="20" x2="120" y2="145" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#2A242B" />
+                        <stop offset="60%" stopColor="#1B171C" />
+                        <stop offset="100%" stopColor="#0F0C0F" />
+                      </linearGradient>
+                      <radialGradient id="fitIris" cx="0.4" cy="0.4" r="0.6">
+                        <stop offset="0%" stopColor="#8A512A" />
+                        <stop offset="50%" stopColor="#5E351B" />
+                        <stop offset="90%" stopColor="#2F180A" />
+                        <stop offset="100%" stopColor="#180C04" />
+                      </radialGradient>
+                      <linearGradient id="fitLicorice" x1="145" y1="35" x2="180" y2="85" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#FB7185" />
+                        <stop offset="45%" stopColor="#F43F5E" />
+                        <stop offset="100%" stopColor="#BE123C" />
+                      </linearGradient>
+                      <linearGradient id="fitHoodieMint" x1="120" y1="136" x2="120" y2="218" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#34D399" />
+                        <stop offset="60%" stopColor="#10B981" />
+                        <stop offset="100%" stopColor="#059669" />
+                      </linearGradient>
+                    </defs>
 
-                    {/* Tops */}
-                    {selectedTop === 'A' && (
-                      <g>
-                        <path d="M70 80 C70 80 85 78 100 78 C115 78 130 80 130 80 L138 135 L124 140 L118 100 L116 160 L84 160 L82 100 L76 140 L62 135 Z" fill="#F472B6" />
-                        <path d="M85 78 L100 95 L115 78 L105 84 L100 90 L95 84 Z" fill="#FBCFE8" />
-                        <circle cx="100" cy="110" r="2" fill="#FFFFFF" />
-                        <circle cx="100" cy="125" r="2" fill="#FFFFFF" />
-                        <circle cx="100" cy="140" r="2" fill="#FFFFFF" />
-                      </g>
-                    )}
-                    {selectedTop === 'B' && (
-                      <g>
-                        <path d="M66 82 C80 80 120 80 134 82 L142 130 L126 135 L120 162 L80 162 L74 135 L58 130 Z" fill="#34D399" />
-                        <ellipse cx="100" cy="82" rx="14" ry="5" fill="#059669" />
-                        <rect x="85" y="110" width="30" height="8" rx="2" fill="#FFFFFF" opacity="0.8" />
-                      </g>
-                    )}
-                    {selectedTop === 'C' && (
-                      <g>
-                        <path d="M65 82 C80 80 120 80 135 82 L145 138 L128 142 L118 165 L82 165 L72 142 L55 138 Z" fill="#10B981" />
-                        <path d="M80 80 C80 95 120 95 120 80 C110 88 90 88 80 80 Z" fill="#047857" />
-                        <path d="M93 92 L91 125" stroke="#F43F5E" strokeWidth="2.5" strokeLinecap="round" />
-                        <path d="M107 92 L109 127" stroke="#F43F5E" strokeWidth="2.5" strokeLinecap="round" />
-                        <path d="M86 138 L114 138 L110 156 L90 156 Z" fill="#059669" />
-                      </g>
-                    )}
-                    {selectedTop === 'D' && (
-                      <g>
-                        <path d="M66 82 C80 80 120 80 134 82 L144 140 L128 144 L118 164 L82 164 L72 144 L56 140 Z" fill="#3B82F6" />
-                        <path d="M84 82 L100 115 L100 164 L96 164 L84 100 Z" fill="#1D4ED8" />
-                        <path d="M116 82 L100 115 L100 164 L104 164 L116 100 Z" fill="#1E40AF" />
-                        <rect x="80" y="105" width="14" height="6" rx="1" fill="#1D4ED8" />
-                        <rect x="106" y="105" width="14" height="6" rx="1" fill="#1D4ED8" />
-                      </g>
-                    )}
+                    {/* Studio Floor Shadow */}
+                    <ellipse cx="120" cy="338" rx="46" ry="8" fill="#0F172A" opacity="0.55" />
 
-                    {/* Bottoms */}
+                    {/* 1. BACK HAIR & HIGH PONYTAIL */}
+                    <path
+                      d="M75 88 C68 58 88 26 122 25 C156 24 174 56 168 88 C168 115 154 132 121 135 C86 135 75 115 75 88 Z"
+                      fill="url(#fitHair)"
+                    />
+                    <g>
+                      <path
+                        d="M152 50 C168 31 190 29 199 42 C208 55 204 77 191 90 C181 99 164 101 155 93 C161 84 164 72 159 61 C156 56 152 52 152 50 Z"
+                        fill="url(#fitHair)"
+                      />
+                      <path d="M177 41 C189 50 193 69 187 82" stroke="#382E3A" strokeWidth="2.4" strokeLinecap="round" />
+                      <path d="M165 46 C177 56 181 72 178 80" stroke="#382E3A" strokeWidth="1.5" strokeLinecap="round" />
+                      {/* Pink Licorice Bow */}
+                      <path d="M149 48 C142 40 138 50 146 56 Z" fill="url(#fitLicorice)" />
+                      <path d="M158 40 C168 32 172 42 162 50 Z" fill="url(#fitLicorice)" />
+                      <ellipse cx="153" cy="48" rx="5" ry="4" fill="#E11D48" />
+                      <path d="M154 51 C158 60 155 71 151 77" stroke="#F43F5E" strokeWidth="3.2" strokeLinecap="round" />
+                      <path d="M151 51 C147 62 148 70 146 75" stroke="#E11D48" strokeWidth="2.8" strokeLinecap="round" />
+                    </g>
+
+                    {/* 2. NECK, BARE ARMS & BARE LEGS BASE */}
+                    <rect x="112" y="122" width="16" height="19" rx="6" fill="#FBDBC6" />
+                    {/* Left & Right Bare Arms + Hands */}
+                    <path d="M96 144 L70 186" stroke="#FBDBC6" strokeWidth="13" strokeLinecap="round" />
+                    <path d="M144 144 L170 186" stroke="#FBDBC6" strokeWidth="13" strokeLinecap="round" />
+                    <circle cx="69" cy="188" r="6.2" fill="url(#fitSkin)" />
+                    <circle cx="171" cy="188" r="6.2" fill="url(#fitSkin)" />
+                    {/* Bare Legs Base */}
+                    <rect x="103" y="214" width="12" height="94" rx="5" fill="#FBDBC6" />
+                    <rect x="125" y="214" width="12" height="94" rx="5" fill="#FBDBC6" />
+
+                    {/* 3. BAWAHAN (BOTTOMS) */}
                     {selectedBottom === '1' && (
                       <g>
-                        <path d="M82 160 L118 160 L135 210 L65 210 Z" fill="#EC4899" />
-                        <path d="M80 160 L80 210" stroke="#BE185D" strokeWidth="1.5" />
-                        <path d="M92 160 L92 210" stroke="#F472B6" strokeWidth="1.5" />
-                        <path d="M100 160 L100 210" stroke="#BE185D" strokeWidth="1.5" />
-                        <path d="M108 160 L108 210" stroke="#F472B6" strokeWidth="1.5" />
-                        <path d="M120 160 L120 210" stroke="#BE185D" strokeWidth="1.5" />
+                        {/* Striped Candy Stockings for Skirt */}
+                        <rect x="103" y="256" width="12" height="52" fill="#A7F3D0" />
+                        <line x1="103" y1="266" x2="115" y2="266" stroke="#059669" strokeWidth="2.5" />
+                        <line x1="103" y1="278" x2="115" y2="278" stroke="#059669" strokeWidth="2.5" />
+                        <line x1="103" y1="290" x2="115" y2="290" stroke="#059669" strokeWidth="2.5" />
+                        <line x1="103" y1="302" x2="115" y2="302" stroke="#059669" strokeWidth="2.5" />
+                        <rect x="125" y="256" width="12" height="52" fill="#A7F3D0" />
+                        <line x1="125" y1="266" x2="137" y2="266" stroke="#059669" strokeWidth="2.5" />
+                        <line x1="125" y1="278" x2="137" y2="278" stroke="#059669" strokeWidth="2.5" />
+                        <line x1="125" y1="290" x2="137" y2="290" stroke="#059669" strokeWidth="2.5" />
+                        <line x1="125" y1="302" x2="137" y2="302" stroke="#059669" strokeWidth="2.5" />
+                        {/* Rok Permen */}
+                        <path d="M97 210 L143 210 L160 262 L80 262 Z" fill="#EC4899" />
+                        <path d="M97 210 L143 210 L144 216 L96 216 Z" fill="#BE185D" />
+                        <line x1="106" y1="216" x2="96" y2="262" stroke="#F472B6" strokeWidth="2" />
+                        <line x1="115" y1="216" x2="111" y2="262" stroke="#BE185D" strokeWidth="2" />
+                        <line x1="125" y1="216" x2="129" y2="262" stroke="#BE185D" strokeWidth="2" />
+                        <line x1="134" y1="216" x2="144" y2="262" stroke="#F472B6" strokeWidth="2" />
+                        <path d="M80 260 Q120 265 160 260" stroke="#FBCFE8" strokeWidth="2.5" strokeLinecap="round" />
                       </g>
                     )}
+
                     {selectedBottom === '2' && (
                       <g>
-                        <path d="M82 160 L118 160 L116 250 L102 250 L100 185 L98 250 L84 250 Z" fill="#78350F" />
-                        <rect x="82" y="160" width="36" height="5" fill="#451A03" />
+                        {/* Celana Cokelat */}
+                        <path
+                          d="M96 210 L144 210 L142 308 L124 308 L120 242 L116 308 L98 308 Z"
+                          fill="#78350F"
+                        />
+                        <rect x="96" y="210" width="48" height="7" rx="2" fill="#451A03" />
+                        <rect x="116" y="211" width="8" height="5" rx="1" fill="#FBBF24" />
+                        {/* Knee & cuff details */}
+                        <rect x="99" y="262" width="15" height="9" rx="3" fill="#92400E" opacity="0.65" />
+                        <rect x="126" y="262" width="15" height="9" rx="3" fill="#92400E" opacity="0.65" />
+                        <line x1="98" y1="303" x2="116" y2="303" stroke="#451A03" strokeWidth="2.5" />
+                        <line x1="124" y1="303" x2="142" y2="303" stroke="#451A03" strokeWidth="2.5" />
                       </g>
                     )}
+
                     {selectedBottom === '3' && (
                       <g>
-                        <path d="M82 160 L118 160 L135 210 L65 210 Z" fill="#2DD4BF" />
-                        <path d="M82 160 L80 210" stroke="#0F766E" strokeWidth="1.5" />
-                        <path d="M94 160 L93 210" stroke="#14B8A6" strokeWidth="1.5" />
-                        <path d="M100 160 L100 210" stroke="#0F766E" strokeWidth="1.5" />
-                        <path d="M106 160 L107 210" stroke="#14B8A6" strokeWidth="1.5" />
-                        <path d="M118 160 L120 210" stroke="#0F766E" strokeWidth="1.5" />
+                        {/* Striped Candy Stockings for Skirt */}
+                        <rect x="103" y="256" width="12" height="52" fill="#FDE68A" />
+                        <line x1="103" y1="266" x2="115" y2="266" stroke="#EC4899" strokeWidth="2.5" />
+                        <line x1="103" y1="278" x2="115" y2="278" stroke="#EC4899" strokeWidth="2.5" />
+                        <line x1="103" y1="290" x2="115" y2="290" stroke="#EC4899" strokeWidth="2.5" />
+                        <line x1="103" y1="302" x2="115" y2="302" stroke="#EC4899" strokeWidth="2.5" />
+                        <rect x="125" y="256" width="12" height="52" fill="#FDE68A" />
+                        <line x1="125" y1="266" x2="137" y2="266" stroke="#EC4899" strokeWidth="2.5" />
+                        <line x1="125" y1="278" x2="137" y2="278" stroke="#EC4899" strokeWidth="2.5" />
+                        <line x1="125" y1="290" x2="137" y2="290" stroke="#EC4899" strokeWidth="2.5" />
+                        <line x1="125" y1="302" x2="137" y2="302" stroke="#EC4899" strokeWidth="2.5" />
+                        {/* Rok Mint */}
+                        <path d="M97 210 L143 210 L160 262 L80 262 Z" fill="#2DD4BF" />
+                        <path d="M97 210 L143 210 L144 216 L96 216 Z" fill="#0F766E" />
+                        <line x1="106" y1="216" x2="96" y2="262" stroke="#99F6E4" strokeWidth="2" />
+                        <line x1="115" y1="216" x2="111" y2="262" stroke="#0F766E" strokeWidth="2" />
+                        <line x1="125" y1="216" x2="129" y2="262" stroke="#0F766E" strokeWidth="2" />
+                        <line x1="134" y1="216" x2="144" y2="262" stroke="#99F6E4" strokeWidth="2" />
+                        <path d="M80 260 Q120 265 160 260" stroke="#CCFBF1" strokeWidth="2.5" strokeLinecap="round" />
                       </g>
                     )}
 
-                    {/* Stockings if skirt */}
-                    {(selectedBottom === '1' || selectedBottom === '3') && (
-                      <g>
-                        <rect x="85" y="210" width="10" height="42" fill="#A7F3D0" />
-                        <line x1="85" y1="220" x2="95" y2="220" stroke="#059669" strokeWidth="2" />
-                        <line x1="85" y1="230" x2="95" y2="230" stroke="#059669" strokeWidth="2" />
-                        <line x1="85" y1="240" x2="95" y2="240" stroke="#059669" strokeWidth="2" />
-                        <rect x="105" y="210" width="10" height="42" fill="#A7F3D0" />
-                        <line x1="105" y1="220" x2="115" y2="220" stroke="#059669" strokeWidth="2" />
-                        <line x1="105" y1="230" x2="115" y2="230" stroke="#059669" strokeWidth="2" />
-                        <line x1="105" y1="240" x2="115" y2="240" stroke="#059669" strokeWidth="2" />
-                      </g>
-                    )}
-
-                    {/* Shoes */}
+                    {/* 4. SEPATU (SHOES) */}
                     {selectedShoes === '1' && (
                       <g>
-                        <path d="M83 250 L96 250 L98 268 C98 272 82 274 74 272 L74 265 L83 255 Z" fill="#FFFFFF" />
-                        <path d="M74 270 L98 270" stroke="#94A3B8" strokeWidth="2" />
-                        <circle cx="88" cy="260" r="1.5" fill="#3B82F6" />
-                        <path d="M104 250 L117 250 L126 255 L126 265 L126 272 C118 274 102 272 102 268 Z" fill="#FFFFFF" />
-                        <path d="M102 270 L126 270" stroke="#94A3B8" strokeWidth="2" />
-                        <circle cx="112" cy="260" r="1.5" fill="#3B82F6" />
+                        {/* Sneakers Putih */}
+                        <path d="M101 304 L117 304 L118 326 C118 331 98 332 88 329 L88 321 L101 310 Z" fill="#FFFFFF" />
+                        <path d="M88 326 L118 326" stroke="#94A3B8" strokeWidth="2.5" />
+                        <path d="M99 313 L107 313" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" />
+                        <circle cx="105" cy="320" r="2" fill="#3B82F6" />
+
+                        <path d="M123 304 L139 304 L139 310 L152 321 L152 329 C142 332 122 331 122 326 Z" fill="#FFFFFF" />
+                        <path d="M122 326 L152 326" stroke="#94A3B8" strokeWidth="2.5" />
+                        <path d="M133 313 L141 313" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" />
+                        <circle cx="135" cy="320" r="2" fill="#3B82F6" />
                       </g>
                     )}
                     {selectedShoes === '2' && (
                       <g>
-                        <path d="M82 245 L97 245 L98 272 C98 276 80 276 72 273 L72 262 L82 250 Z" fill="#DC2626" />
-                        <path d="M72 271 L98 271" stroke="#7F1D1D" strokeWidth="2.5" />
-                        <rect x="82" y="247" width="15" height="3" fill="#FCA5A5" />
-                        <path d="M103 245 L118 245 L118 250 L128 262 L128 273 C120 276 102 276 102 272 Z" fill="#DC2626" />
-                        <path d="M102 271 L128 271" stroke="#7F1D1D" strokeWidth="2.5" />
-                        <rect x="103" y="247" width="15" height="3" fill="#FCA5A5" />
+                        {/* Sepatu Bot Merah */}
+                        <path d="M100 296 L118 296 L118 328 C118 333 96 333 86 329 L86 318 L100 305 Z" fill="#DC2626" />
+                        <path d="M86 326 L118 326" stroke="#7F1D1D" strokeWidth="3" />
+                        <rect x="100" y="296" width="18" height="5" rx="2" fill="#FCA5A5" />
+                        <circle cx="105" cy="316" r="2" fill="#FDE68A" />
+
+                        <path d="M122 296 L140 296 L140 305 L154 318 L154 329 C144 333 122 333 122 328 Z" fill="#DC2626" />
+                        <path d="M122 326 L154 326" stroke="#7F1D1D" strokeWidth="3" />
+                        <rect x="122" y="296" width="18" height="5" rx="2" fill="#FCA5A5" />
+                        <circle cx="135" cy="316" r="2" fill="#FDE68A" />
                       </g>
                     )}
+
+                    {/* 5. ATASAN (TOPS) */}
+                    {selectedTop === 'A' && (
+                      <g>
+                        {/* Kemeja Pastel */}
+                        <path
+                          d="M92 138 C104 135 136 135 148 138 L174 182 L160 190 L144 162 L145 215 L95 215 L96 162 L80 190 L66 182 Z"
+                          fill="#F472B6"
+                        />
+                        {/* White Peter-Pan Collar */}
+                        <path d="M104 136 L120 153 L136 136 L126 142 L120 148 L114 142 Z" fill="#FDF2F8" />
+                        {/* Placket & Pearl Buttons */}
+                        <line x1="120" y1="152" x2="120" y2="215" stroke="#DB2777" strokeWidth="1.5" />
+                        <circle cx="120" cy="164" r="2.2" fill="#FFFFFF" />
+                        <circle cx="120" cy="180" r="2.2" fill="#FFFFFF" />
+                        <circle cx="120" cy="196" r="2.2" fill="#FFFFFF" />
+                        {/* Sleeve Cuffs */}
+                        <path d="M67 180 L80 188" stroke="#FDF2F8" strokeWidth="4" strokeLinecap="round" />
+                        <path d="M173 180 L160 188" stroke="#FDF2F8" strokeWidth="4" strokeLinecap="round" />
+                      </g>
+                    )}
+
+                    {selectedTop === 'B' && (
+                      <g>
+                        {/* Kaos Oversize */}
+                        <path
+                          d="M88 138 C102 135 138 135 152 138 L172 178 L155 186 L146 164 L147 217 L93 217 L94 164 L85 186 L68 178 Z"
+                          fill="#34D399"
+                        />
+                        <ellipse cx="120" cy="138" rx="14" ry="5" fill="#059669" />
+                        <rect x="102" y="168" width="36" height="9" rx="3" fill="#FFFFFF" opacity="0.9" />
+                        <rect x="108" y="182" width="24" height="4" rx="2" fill="#FDE047" />
+                      </g>
+                    )}
+
+                    {selectedTop === 'C' && (
+                      <g>
+                        {/* Hoodie Mint Khas Vanellope */}
+                        <path
+                          d="M90 138 C102 135 138 135 150 138 L176 184 L161 190 L144 164 L147 217 L93 217 L96 164 L79 190 L64 184 Z"
+                          fill="url(#fitHoodieMint)"
+                        />
+                        {/* Hood Collar */}
+                        <path d="M98 135 C106 151 134 151 142 135 C134 155 106 155 98 135 Z" fill="#047857" />
+                        {/* Pink Licorice Drawstrings */}
+                        <path d="M112 144 L110 176" stroke="#F43F5E" strokeWidth="2.6" strokeLinecap="round" />
+                        <circle cx="110" cy="177" r="2.4" fill="#E11D48" />
+                        <path d="M128 144 L130 178" stroke="#F43F5E" strokeWidth="2.6" strokeLinecap="round" />
+                        <circle cx="130" cy="179" r="2.4" fill="#E11D48" />
+                        {/* Kangaroo Pocket */}
+                        <path d="M101 186 L139 186 L134 211 L106 211 Z" fill="#059669" opacity="0.9" />
+                        <path d="M104 187 L108 209" stroke="#34D399" strokeWidth="1.2" strokeDasharray="2 2" />
+                        <path d="M136 187 L132 209" stroke="#34D399" strokeWidth="1.2" strokeDasharray="2 2" />
+                        {/* Cuffs */}
+                        <path d="M65 182 L79 189" stroke="#047857" strokeWidth="4.5" strokeLinecap="round" />
+                        <path d="M175 182 L161 189" stroke="#047857" strokeWidth="4.5" strokeLinecap="round" />
+                      </g>
+                    )}
+
+                    {selectedTop === 'D' && (
+                      <g>
+                        {/* Jaket Denim */}
+                        <path
+                          d="M90 138 C102 135 138 135 150 138 L175 184 L161 190 L144 164 L147 216 L93 216 L96 164 L79 190 L65 184 Z"
+                          fill="#2563EB"
+                        />
+                        {/* Inner White Tee */}
+                        <path d="M109 136 L131 136 L126 216 L114 216 Z" fill="#F8FAFC" />
+                        {/* Denim Lapels */}
+                        <path d="M102 137 L115 164 L114 216 L108 216 L102 156 Z" fill="#1D4ED8" />
+                        <path d="M138 137 L125 164 L126 216 L132 216 L138 156 Z" fill="#1E40AF" />
+                        {/* Chest Pockets & Buttons */}
+                        <rect x="97" y="164" width="12" height="10" rx="1.5" fill="#1D4ED8" stroke="#93C5FD" strokeWidth="0.8" />
+                        <rect x="131" y="164" width="12" height="10" rx="1.5" fill="#1D4ED8" stroke="#93C5FD" strokeWidth="0.8" />
+                        <circle cx="112" cy="176" r="1.8" fill="#E2E8F0" />
+                        <circle cx="112" cy="194" r="1.8" fill="#E2E8F0" />
+                      </g>
+                    )}
+
+                    {/* 6. VANELLOPE EARS, FACE, EYES, SMILE & BANGS */}
+                    {/* Ears + Candy Earrings */}
+                    <ellipse cx="75" cy="94" rx="6.5" ry="9" fill="#FBDBC6" />
+                    <ellipse cx="76" cy="94" rx="3.5" ry="5" fill="#F4BAA1" />
+                    <ellipse cx="165" cy="94" rx="6.5" ry="9" fill="#FBDBC6" />
+                    <ellipse cx="164" cy="94" rx="3.5" ry="5" fill="#F4BAA1" />
+                    <circle cx="74" cy="100" r="2.2" fill="#34D399" />
+                    <circle cx="166" cy="100" r="2.2" fill="#EC4899" />
+
+                    {/* Face Base */}
+                    <path
+                      d="M79 86 C77 65 93 54 120 54 C147 54 163 65 161 86 C161 112 144 127 120 127 C96 127 79 112 79 86 Z"
+                      fill="url(#fitSkin)"
+                    />
+
+                    {/* Rosy Cheeks & Freckles */}
+                    <ellipse cx="91" cy="100" rx="9" ry="5" fill="#FDA4AF" opacity="0.65" />
+                    <ellipse cx="149" cy="100" rx="9" ry="5" fill="#FDA4AF" opacity="0.65" />
+                    <circle cx="88" cy="99" r="1" fill="#FB7185" />
+                    <circle cx="93" cy="101" r="1" fill="#FB7185" />
+                    <circle cx="147" cy="101" r="1" fill="#FB7185" />
+                    <circle cx="152" cy="99" r="1" fill="#FB7185" />
+
+                    {/* Front Bangs */}
+                    <g>
+                      <path
+                        d="M77 74 C83 59 100 57 112 67 C121 56 141 56 151 65 C158 58 161 68 161 75 C159 61 150 47 120 47 C90 47 81 61 77 74 Z"
+                        fill="url(#fitHair)"
+                      />
+                      <path d="M98 62 C110 60 127 61 139 71 C132 79 120 81 113 74 C108 79 99 77 98 62 Z" fill="#1B171C" />
+                      <path d="M79 71 C76 86 79 100 84 105 C81 95 81 83 84 74 Z" fill="#1F1A20" />
+                      <path d="M161 71 C164 86 161 100 156 105 C159 95 159 83 156 74 Z" fill="#1F1A20" />
+                      <path d="M93 59 C105 54 134 54 148 59" stroke="#A78BFA" strokeWidth="2.2" strokeLinecap="round" opacity="0.35" />
+                    </g>
+
+                    {/* Candy Hair Ornaments */}
+                    <g>
+                      <g transform="translate(86, 40)">
+                        <circle cx="5.5" cy="5.5" r="5.5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="0.8" />
+                        <path d="M5.5 0 C7.5 2.5 7.5 8.5 5.5 11" stroke="#EF4444" strokeWidth="1.7" />
+                        <path d="M0 5.5 C2.5 7.5 8.5 7.5 11 5.5" stroke="#EF4444" strokeWidth="1.7" />
+                        <circle cx="5.5" cy="5.5" r="1.8" fill="#F87171" />
+                      </g>
+                      <polygon
+                        points="142,37 144,41 148,41 145,44 146,48 142,46 138,48 139,44 136,41 140,41"
+                        fill="#FBBF24"
+                        stroke="#F59E0B"
+                        strokeWidth="0.6"
+                      />
+                      <rect x="100" y="36" width="6" height="2.8" rx="1.4" transform="rotate(20 100 36)" fill="#38BDF8" />
+                      <rect x="115" y="33" width="6.5" height="2.8" rx="1.4" transform="rotate(-14 115 33)" fill="#F43F5E" />
+                      <rect x="129" y="36" width="5.5" height="2.8" rx="1.4" transform="rotate(42 129 36)" fill="#34D399" />
+                      <circle cx="108" cy="47" r="2.2" fill="#A855F7" />
+                      <circle cx="125" cy="45" r="2" fill="#FB923C" />
+                      <rect x="172" y="65" width="5" height="2.6" rx="1.3" transform="rotate(-28 172 65)" fill="#F472B6" />
+                      <circle cx="185" cy="59" r="2.3" fill="#FBBF24" />
+                    </g>
+
+                    {/* Eyebrows */}
+                    <path d="M91 74 Q100 69 108 73" stroke="#3D2B1F" strokeWidth="2.2" strokeLinecap="round" />
+                    <path d="M132 73 Q140 69 149 74" stroke="#3D2B1F" strokeWidth="2.2" strokeLinecap="round" />
+
+                    {/* Expressive Chibi Eyes */}
+                    <g>
+                      <ellipse cx="100" cy="89" rx="9.5" ry="11.5" fill="#FFFFFF" />
+                      <ellipse cx="101" cy="89" rx="7.8" ry="10.2" fill="url(#fitIris)" />
+                      <ellipse cx="101" cy="89" rx="4.8" ry="6.4" fill="#0C0502" />
+                      <path d="M95 93 C97 97 104 97 106 93" stroke="#F59E0B" strokeWidth="1.4" strokeLinecap="round" />
+                      <circle cx="97.5" cy="85" r="3" fill="#FFFFFF" />
+                      <circle cx="104" cy="92.5" r="1.5" fill="#FFFFFF" />
+                      <path d="M89 86 C93 78 106 78 110 86" stroke="#1B171C" strokeWidth="2.8" strokeLinecap="round" />
+                      <path d="M108 82 L112 79" stroke="#1B171C" strokeWidth="1.8" strokeLinecap="round" />
+
+                      <ellipse cx="140" cy="89" rx="9.5" ry="11.5" fill="#FFFFFF" />
+                      <ellipse cx="139" cy="89" rx="7.8" ry="10.2" fill="url(#fitIris)" />
+                      <ellipse cx="139" cy="89" rx="4.8" ry="6.4" fill="#0C0502" />
+                      <path d="M134 93 C136 97 143 97 145 93" stroke="#F59E0B" strokeWidth="1.4" strokeLinecap="round" />
+                      <circle cx="136" cy="85" r="3" fill="#FFFFFF" />
+                      <circle cx="142.5" cy="92.5" r="1.5" fill="#FFFFFF" />
+                      <path d="M130 86 C134 78 147 78 151 86" stroke="#1B171C" strokeWidth="2.8" strokeLinecap="round" />
+                      <path d="M149 82 L153 79" stroke="#1B171C" strokeWidth="1.8" strokeLinecap="round" />
+                    </g>
+
+                    {/* Cute Nose & Cheerful Open Smile */}
+                    <path d="M118 96 Q120 98 122 96" stroke="#D97706" strokeWidth="1.7" strokeLinecap="round" />
+                    <path d="M112 105 Q120 117 128 105 Z" fill="#BE123C" stroke="#881337" strokeWidth="1.5" />
+                    <path d="M114 106 Q120 108.5 126 106" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" />
+                    <ellipse cx="120" cy="111" rx="4.2" ry="2.5" fill="#FB7185" />
                   </svg>
                 </div>
 
@@ -475,7 +697,7 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
               </div>
 
               {/* Right Column: All Outfit Selection Options (Atasan, Bawahan, Sepatu) */}
-              <div className="md:col-span-7 space-y-5">
+              <div className="space-y-5">
                 {/* Pilih Atasan (4 Opsi) */}
                 <div className="bg-white rounded-3xl p-5 border-2 border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3.5">

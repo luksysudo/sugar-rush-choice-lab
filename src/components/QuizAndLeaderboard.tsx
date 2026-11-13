@@ -284,7 +284,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
 
   const handleExecuteReset = async () => {
     if (teacherPinInput.trim() !== '1234') {
-      setResetError('PIN salah! Masukkan PIN guru yang benar (1234).');
+      setResetError('PIN salah! Akses ditolak, hanya guru yang dapat mereset papan peringkat.');
       return;
     }
 
@@ -779,7 +779,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
         </div>
       </div>
 
-      {/* Teacher PIN Reset Modal (PIN: 1234) */}
+      {/* Teacher PIN Reset Modal */}
       {showResetModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
           <div className="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-amber-200 space-y-4">
