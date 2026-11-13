@@ -26,6 +26,7 @@ import {
   verifyMission2Challenge1,
   verifyMission2Challenge2,
 } from '../utils/mathRules';
+import { playCorrectSound, playWrongSound } from '../utils/soundEffects';
 
 interface Mission2Props {
   profile: StudentProfile;
@@ -85,6 +86,7 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
 
     if (correct) {
       setC1Correct(true);
+      playCorrectSound();
       try {
         confetti({
           particleCount: 75,
@@ -98,6 +100,7 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
     } else {
       setC1Correct(false);
       setC1HintLevel((prev) => prev + 1);
+      playWrongSound();
     }
   };
 
@@ -109,6 +112,7 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
 
     if (correct) {
       setC2Correct(true);
+      playCorrectSound();
       try {
         confetti({
           particleCount: 95,
@@ -122,11 +126,12 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
     } else {
       setC2Correct(false);
       setC2HintLevel((prev) => prev + 1);
+      playWrongSound();
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern p-3 sm:p-6 pb-12 flex flex-col">
+    <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern p-3 sm:p-6 pt-16 sm:pt-16 pb-12 flex flex-col">
       {/* Top Navigation */}
       <div className="max-w-6xl mx-auto w-full mb-4">
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-pink-100 flex items-center justify-between">
@@ -637,7 +642,7 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
                   </div>
                   <p className="text-xs sm:text-sm text-emerald-800/90 leading-relaxed">
                     <strong>Rangkuman Pembelajaran:</strong>
-                    <br />• <em>Tantangan 1:</em> Berhasil mengklasifikasikan kejadian saling lepas ("ATAU" $\to$ Penjumlahan) dan kejadian berpasangan ("DAN" $\to$ Perkalian).
+                    <br />• <em>Tantangan 1:</em> Berhasil mengklasifikasikan kejadian saling lepas ("ATAU" ➔ Penjumlahan) dan kejadian berpasangan ("DAN" ➔ Perkalian).
                     <br />• <em>Tantangan 2:</em> Aturan Perkalian kostum: 4 × 3 × 2 = 24 kombinasi.
                   </p>
                   <div className="pt-2 flex justify-end">

@@ -31,6 +31,7 @@ import {
   verifyFoodGoTantangan2Subtotals,
   verifyFoodGoTantangan2Total,
 } from '../utils/mathRules';
+import { playCorrectSound, playWrongSound } from '../utils/soundEffects';
 
 interface Mission4Props {
   profile: StudentProfile;
@@ -79,12 +80,14 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
 
     if (res.allSubtotalsOk) {
       setT1SubtotalsCorrect(true);
+      playCorrectSound();
       try {
         confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
       } catch {}
     } else {
       setT1SubtotalsCorrect(false);
       setT1HintLevel((prev) => prev + 1);
+      playWrongSound();
     }
   };
 
@@ -96,12 +99,14 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
 
     if (correct) {
       setT1TotalCorrect(true);
+      playCorrectSound();
       try {
         confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       } catch {}
     } else {
       setT1TotalCorrect(false);
       setT1HintLevel((prev) => prev + 1);
+      playWrongSound();
     }
   };
 
@@ -117,12 +122,14 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
 
     if (res.allSubtotalsOk) {
       setT2SubtotalsCorrect(true);
+      playCorrectSound();
       try {
         confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
       } catch {}
     } else {
       setT2SubtotalsCorrect(false);
       setT2HintLevel((prev) => prev + 1);
+      playWrongSound();
     }
   };
 
@@ -134,17 +141,19 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
 
     if (correct) {
       setT2TotalCorrect(true);
+      playCorrectSound();
       try {
         confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
       } catch {}
     } else {
       setT2TotalCorrect(false);
       setT2HintLevel((prev) => prev + 1);
+      playWrongSound();
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern p-3 sm:p-6 pb-12 flex flex-col">
+    <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern p-3 sm:p-6 pt-16 sm:pt-16 pb-12 flex flex-col">
       {/* Top Bar */}
       <div className="max-w-6xl mx-auto w-full mb-4">
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-pink-100 flex items-center justify-between">
@@ -316,13 +325,13 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
                   </div>
                   <ul className="text-xs sm:text-sm space-y-1.5 pl-6 list-disc font-medium text-amber-900/90 leading-relaxed">
                     <li>
-                      <strong>Paket Sehat:</strong> 1 Makanan <strong>DAN</strong> 1 Minuman dipasangkan $\to$ gunakan Aturan Perkalian: (2 makanan) × (3 minuman).
+                      <strong>Paket Sehat:</strong> 1 Makanan <strong>DAN</strong> 1 Minuman dipasangkan ➔ gunakan Aturan Perkalian: (2 makanan) × (3 minuman).
                     </li>
                     <li>
                       <strong>Paket Hemat:</strong> Hitung total kombinasi (3 makanan × 2 minuman), lalu kurangi 1 pasangan yang dilarang.
                     </li>
                     <li>
-                      <strong>Paket Spesial:</strong> 2 makanan dipasangkan bebas dengan 2 minuman $\to$ gunakan Aturan Perkalian: (2 makanan) × (2 minuman).
+                      <strong>Paket Spesial:</strong> 2 makanan dipasangkan bebas dengan 2 minuman ➔ gunakan Aturan Perkalian: (2 makanan) × (2 minuman).
                     </li>
                   </ul>
                 </div>
@@ -593,13 +602,13 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
                   </div>
                   <ul className="text-xs sm:text-sm space-y-1.5 pl-6 list-disc font-medium text-amber-900/90 leading-relaxed">
                     <li>
-                      <strong>Paket Sehat:</strong> Karena 1 minuman habis, tersisa 2 makanan & 2 minuman $\to$ gunakan Aturan Perkalian (2 × 2).
+                      <strong>Paket Sehat:</strong> Karena 1 minuman habis, tersisa 2 makanan & 2 minuman ➔ gunakan Aturan Perkalian (2 × 2).
                     </li>
                     <li>
-                      <strong>Paket Hemat:</strong> Karena larangan dibuka penuh, semua 3 makanan bebas berpasangan dengan 2 minuman $\to$ gunakan Aturan Perkalian (3 × 2).
+                      <strong>Paket Hemat:</strong> Karena larangan dibuka penuh, semua 3 makanan bebas berpasangan dengan 2 minuman ➔ gunakan Aturan Perkalian (3 × 2).
                     </li>
                     <li>
-                      <strong>Paket Spesial:</strong> Makanan 1 memiliki 2 pasangan minuman, sedangkan Makanan 2 memiliki 1 pasangan minuman $\to$ jumlahkan (2 + 1).
+                      <strong>Paket Spesial:</strong> Makanan 1 memiliki 2 pasangan minuman, sedangkan Makanan 2 memiliki 1 pasangan minuman ➔ jumlahkan (2 + 1).
                     </li>
                   </ul>
                 </div>

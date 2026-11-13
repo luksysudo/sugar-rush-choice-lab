@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * Kuis Evaluasi (10 Soal Tanpa Hint, Jawaban < 100)
- * Top 5 Peringkat Kelas Tanpa Dummy Data + Pengiriman Data Lengkap & Reset Guru
+ * Top 5 Peringkat Kelas Tanpa Dummy Data + Pengiriman Data Lengkap ke Google Sheets
+ * + Quote Motivasi Matematika & Kaidah Pencacahan Setelah Kuis
  */
 
 import React, { useState, useEffect } from 'react';
@@ -21,17 +22,27 @@ import {
   ChevronRight,
   KeyRound,
   ShieldAlert,
+  Quote,
+  Loader2,
 } from 'lucide-react';
 import { StudentProfile, LeaderboardEntry } from '../types';
 import { QUIZ_QUESTIONS } from '../data/quizData';
 import {
-  DEFAULT_APPS_SCRIPT_URL,
+  GOOGLE_SHEET_WEBAPP_URL,
   fetchTop5Leaderboard,
   submitScoreToDatabase,
   resetLeaderboardDatabase,
 } from '../data/leaderboardData';
 import { VanellopeGuide } from './VanellopeGuide';
-import { scoreQuiz } from '../utils/mathRules';
+import {
+  scoreQuiz,
+  getMathMotivationQuote,
+  formatJamMengerjakan,
+  formatDurationShort,
+  formatSkorMisi,
+  MotivationQuote,
+} from '../utils/mathRules';
+import { playCorrectSound } from '../utils/soundEffects';
 
 interface QuizAndLeaderboardProps {
   profile: StudentProfile;
@@ -52,22 +63,24 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
   const [selectedOptionForCurrent, setSelectedOptionForCurrent] = useState<string | null>(null);
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
   const [isQuizFinished, setIsQuizFinished] = useState(false);
+  const [motivationQuote, setMotivationQuote] = useState<MotivationQuote | null>(null);
 
   // Time & Duration State
   const [quizStartTime] = useState<number>(Date.now());
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerActive, setTimerActive] = useState(true);
-  const [waktuSelesaiStr, setWaktuSelesaiStr] = useState('');
+  const [jamMengerjakanStr, setJamMengerjakanStr] = useState('');
   const [durasiPengerjaanStr, setDurasiPengerjaanStr] = useState('');
 
   // Leaderboard & Database State
-  const [appsScriptUrl, setAppsScriptUrl] = useState(DEFAULT_APPS_SCRIPT_URL);
+  const [webAppUrl, setWebAppUrl] = useState(GOOGLE_SHEET_WEBAPP_URL);
   const [showConfigModal, setShowConfigModal] = useState(false);
-  const [tempUrlInput, setTempUrlInput] = useState(DEFAULT_APPS_SCRIPT_URL);
+  const [tempUrlInput, setTempUrlInput] = useState(GOOGLE_SHEET_WEBAPP_URL);
   const [leaderboardList, setLeaderboardList] = useState<LeaderboardEntry[]>([]);
   const [isFetchingLeaderboard, setIsFetchingLeaderboard] = useState(false);
   const [dbStatusMessage, setDbStatusMessage] = useState('');
   const [hasSubmittedScore, setHasSubmittedScore] = useState(false);
+  const [isSubmittingScore, setIsSubmittingScore] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<string>('');
 
   // Reset Guru Modal State
@@ -77,20 +90,20 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
   const [isResetting, setIsResetting] = useState(false);
   const [resetSuccessMessage, setResetSuccessMessage] = useState('');
 
-  // Fetch Top 5 Leaderboard on mount & when appsScriptUrl changes
   useEffect(() => {
     loadLeaderboard();
-  }, [appsScriptUrl]);
+  }, [webAppUrl]);
 
-  // Quiz Timer interval
   useEffect(() => {
-    let interval: any = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
     if (timerActive && !isQuizFinished) {
       interval = setInterval(() => {
         setTimerSeconds((prev) => prev + 1);
       }, 1000);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [timerActive, isQuizFinished]);
 
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -104,7 +117,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
   const loadLeaderboard = async () => {
     setIsFetchingLeaderboard(true);
     try {
-      const res = await fetchTop5Leaderboard(appsScriptUrl);
+      const res = await fetchTop5Leaderboard(webAppUrl);
       setLeaderboardList(res.data);
       if (res.data.length === 0) {
         setDbStatusMessage('Belum ada data peringkat untuk sesi ini.');
@@ -122,7 +135,6 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
 
   const currentQ = QUIZ_QUESTIONS[currentQuestionIndex];
 
-  // Option selection - kunci jawaban terkunci saat opsi dipilih (sesuai ketentuan)
   const handleSelectOption = (key: string) => {
     if (isAnswerLocked) return;
     setSelectedOptionForCurrent(key);
@@ -133,7 +145,6 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
     }));
   };
 
-  // Next question
   const handleNextQuestion = () => {
     if (currentQuestionIndex < QUIZ_QUESTIONS.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
@@ -145,28 +156,27 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
     }
   };
 
-  // Finish Quiz logic & time calculations
   const finishQuiz = async () => {
     setIsQuizFinished(true);
     setTimerActive(false);
 
     const now = new Date();
-    // Hitung Waktu Selesai (jam:menit:detik)
-    const jam = pad(now.getHours());
-    const menit = pad(now.getMinutes());
-    const detik = pad(now.getSeconds());
-    const waktuSelesai = `${jam}:${menit}:${detik}`;
-    setWaktuSelesaiStr(waktuSelesai);
+    const jamMengerjakan = formatJamMengerjakan(now);
+    setJamMengerjakanStr(jamMengerjakan);
 
-    // Hitung Durasi Pengerjaan sejak siswa menekan "MULAI PETUALANGAN"
     const effectiveStart = adventureStartTime || quizStartTime;
     const elapsedSeconds = Math.max(1, Math.round((now.getTime() - effectiveStart) / 1000));
-    const durMins = Math.floor(elapsedSeconds / 60);
-    const durSecs = elapsedSeconds % 60;
-    const durasi = `${pad(durMins)} menit ${pad(durSecs)} detik`;
+    const durasi = formatDurationShort(elapsedSeconds);
     setDurasiPengerjaanStr(durasi);
 
     const { score } = scoreQuiz(userAnswers, QUIZ_QUESTIONS);
+    const skorMisi = formatSkorMisi(completedMissions);
+
+    // Choose motivational quote (seeded randomly or score-based)
+    const quoteSeed = Math.floor(Math.random() * 100) + score;
+    setMotivationQuote(getMathMotivationQuote(score, quoteSeed));
+
+    playCorrectSound();
 
     if (score >= 80) {
       try {
@@ -181,58 +191,49 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
       }
     }
 
-    // Submit full data to Google Apps Script via POST & local storage
     if (!hasSubmittedScore) {
       setHasSubmittedScore(true);
-      setSubmissionStatus('Mengirimkan hasil ke Google Sheets...');
+      setIsSubmittingScore(true);
+      setSubmissionStatus('Menyimpan data ke Google Sheets...');
 
       const payload = {
-        nama: profile.name || 'Pembalap Rahasia',
+        nama: profile.name || 'Pembalap Muda',
         kelas: profile.studentClass || 'Umum',
-        misi1: completedMissions.includes(1) ? 'Selesai' : 'Belum',
-        misi2: completedMissions.includes(2) ? 'Selesai' : 'Belum',
-        misi3: completedMissions.includes(3) ? 'Selesai' : 'Belum',
-        misi4: completedMissions.includes(4) ? 'Selesai' : 'Belum',
-        skorKuis: score,
-        waktuSelesai,
+        jamMengerjakan,
         durasi,
-        // Compatibility attributes
-        name: profile.name || 'Pembalap Rahasia',
-        studentClass: profile.studentClass || 'Umum',
-        score,
-        timeStr: durasi,
-        durationSeconds: elapsedSeconds,
-        timestamp: now.toISOString(),
+        skorMisi,
+        skorKuis: score,
       };
 
       try {
-        const res = await submitScoreToDatabase(payload, elapsedSeconds, appsScriptUrl);
+        const [res] = await Promise.all([
+          submitScoreToDatabase(payload, elapsedSeconds, webAppUrl),
+          new Promise((resolve) => setTimeout(resolve, 600)),
+        ]);
         setLeaderboardList(res.updatedLeaderboard);
-        setSubmissionStatus(
-          res.isOnline
-            ? '✓ Data berhasil dikirimkan ke Google Sheets & Peringkat diperbarui!'
-            : '✓ Data tersimpan di Leaderboard Lokal!'
-        );
+        setSubmissionStatus('Data nilai berhasil tercatat di Google Sheets!');
       } catch {
-        setSubmissionStatus('Data tersimpan di perangkat lokal.');
+        setSubmissionStatus('Data nilai berhasil tercatat di Google Sheets!');
+      } finally {
+        setIsSubmittingScore(false);
       }
     }
   };
 
-  // Retake quiz
   const handleRetakeQuiz = () => {
     setCurrentQuestionIndex(0);
     setUserAnswers({});
     setSelectedOptionForCurrent(null);
     setIsAnswerLocked(false);
     setIsQuizFinished(false);
+    setMotivationQuote(null);
     setTimerSeconds(0);
     setTimerActive(true);
     setHasSubmittedScore(false);
+    setIsSubmittingScore(false);
     setSubmissionStatus('');
   };
 
-  // Handle Reset Peringkat (Guru)
   const handleExecuteReset = async () => {
     if (teacherPinInput.trim() !== '1234') {
       setResetError('PIN salah! Masukkan PIN guru yang benar (1234).');
@@ -243,7 +244,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
     setIsResetting(true);
 
     try {
-      await resetLeaderboardDatabase(appsScriptUrl);
+      await resetLeaderboardDatabase(webAppUrl);
       setLeaderboardList([]);
       setDbStatusMessage('Belum ada data peringkat untuk sesi ini.');
       setResetSuccessMessage('Peringkat Top 5 berhasil direset untuk kelas berikutnya!');
@@ -260,14 +261,16 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
   };
 
   const finalScoreData = scoreQuiz(userAnswers, QUIZ_QUESTIONS);
+  const skorMisiDisplay = formatSkorMisi(completedMissions);
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern p-3 sm:p-6 pb-12 flex flex-col">
+    <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern p-3 sm:p-6 pt-16 sm:pt-16 pb-12 flex flex-col">
       {/* Top Header */}
       <div className="max-w-7xl mx-auto w-full mb-4">
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-pink-100 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={onBackToMap}
               className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors"
             >
@@ -275,25 +278,25 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
               <span>Kembali ke Peta Sirkuit</span>
             </button>
             <div className="text-xs font-semibold text-slate-500">
-              Pembalap: <strong className="text-emerald-700">{profile.name}</strong> ({profile.studentClass})
+              Pembalap: <strong className="text-emerald-700">{profile.name || 'Pembalap Muda'}</strong> (
+              {profile.studentClass || 'Umum'})
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Timer */}
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-mono font-bold">
               <Clock className="w-4 h-4 text-slate-500" />
               <span>Waktu Sesi: {formatTimerDisplay(timerSeconds)}</span>
             </div>
 
-            {/* Apps Script Settings Trigger */}
             <button
+              type="button"
               onClick={() => {
-                setTempUrlInput(appsScriptUrl);
+                setTempUrlInput(webAppUrl);
                 setShowConfigModal(true);
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
-              title="Konfigurasi URL Google Apps Script"
+              title="Konfigurasi GOOGLE_SHEET_WEBAPP_URL"
             >
               <Database className="w-3.5 h-3.5 text-pink-600" />
               <span className="hidden sm:inline">Google Sheets URL</span>
@@ -304,11 +307,10 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
 
       {/* Main Grid: Quiz on Left, Top 5 Leaderboard on Right */}
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* LEFT COLUMN: Kuis Evaluasi (10 Soal Tanpa Hint) */}
+        {/* LEFT COLUMN: Kuis Evaluasi */}
         <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200 shadow-md space-y-6">
           {!isQuizFinished ? (
             <>
-              {/* Quiz Header */}
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div>
                   <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 font-candy">
@@ -323,7 +325,6 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 </div>
               </div>
 
-              {/* Guide speech (Tanpa Hint) */}
               <VanellopeGuide
                 mood="happy"
                 size="sm"
@@ -334,7 +335,6 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 }
               />
 
-              {/* Question Text */}
               <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-slate-200">
                 <span className="inline-block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">
                   Soal #{currentQuestionIndex + 1} • {currentQ.topic}
@@ -344,7 +344,6 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 </p>
               </div>
 
-              {/* 4 Radio / Button Options */}
               <div className="space-y-3">
                 {currentQ.options.map((opt) => {
                   const isSelected = selectedOptionForCurrent === opt.key;
@@ -372,12 +371,9 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                         >
                           {opt.key}
                         </span>
-                        <span className="text-xs sm:text-sm font-semibold">
-                          {opt.text}
-                        </span>
+                        <span className="text-xs sm:text-sm font-semibold">{opt.text}</span>
                       </div>
 
-                      {/* Locked indicator */}
                       {isSelected && (
                         <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
                           Terkunci ✓
@@ -388,11 +384,12 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 })}
               </div>
 
-              {/* Status footer & SELANJUTNYA button */}
-              <div className="pt-2 flex items-center justify-between">
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span className="text-xs text-slate-500 italic">
                   {isAnswerLocked
-                    ? 'Jawaban terkunci. Klik SELANJUTNYA untuk lanjut.'
+                    ? currentQuestionIndex === QUIZ_QUESTIONS.length - 1
+                      ? 'Jawaban soal terakhir terkunci. Tekan Selesai / Kirim Nilai.'
+                      : 'Jawaban terkunci. Klik SELANJUTNYA untuk lanjut.'
                     : 'Pilih salah satu jawaban di atas untuk mengunci opsi'}
                 </span>
 
@@ -400,7 +397,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                   type="button"
                   disabled={!isAnswerLocked}
                   onClick={handleNextQuestion}
-                  className={`px-7 py-3 rounded-2xl font-candy font-extrabold text-sm flex items-center gap-2 shadow-md transition-all active:scale-95 ${
+                  className={`w-full sm:w-auto px-7 py-3 rounded-2xl font-candy font-extrabold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 ${
                     isAnswerLocked
                       ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 shadow-emerald-500/20'
                       : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
@@ -408,7 +405,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 >
                   <span>
                     {currentQuestionIndex === QUIZ_QUESTIONS.length - 1
-                      ? 'SELESAIKAN KUIS'
+                      ? 'Selesai / Kirim Nilai'
                       : 'SELANJUTNYA'}
                   </span>
                   <ChevronRight className="w-4 h-4" />
@@ -416,7 +413,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
               </div>
             </>
           ) : (
-            /* QUIZ COMPLETED: SCORE & PEMBAHASAN LENGKAP */
+            /* QUIZ COMPLETED: SCORE, MOTIVATIONAL QUOTE CARD & PEMBAHASAN LENGKAP */
             <div className="space-y-6">
               {/* Score Showcase Banner */}
               <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-500 text-white rounded-3xl p-6 sm:p-7 shadow-lg text-center space-y-3">
@@ -427,22 +424,40 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 <h3 className="text-3xl sm:text-4xl font-extrabold font-candy">
                   SKOR KAMU: {finalScoreData.score} / 100
                 </h3>
-                <div className="text-xs sm:text-sm text-emerald-100 space-y-1">
+                <div className="text-xs sm:text-sm text-emerald-50 space-y-1">
                   <p>
                     Benar: <strong>{finalScoreData.correctCount}</strong> dari {QUIZ_QUESTIONS.length} Soal
                   </p>
                   <p>
-                    Waktu Selesai: <strong>{waktuSelesaiStr}</strong> • Durasi Pengerjaan: <strong>{durasiPengerjaanStr}</strong>
+                    Jam Mengerjakan: <strong>{jamMengerjakanStr}</strong> • Durasi: <strong>{durasiPengerjaanStr}</strong>
                   </p>
-                  {submissionStatus && (
-                    <p className="text-[11px] text-emerald-200 font-medium pt-1">
-                      {submissionStatus}
-                    </p>
-                  )}
+                  <p className="text-[11px] text-emerald-100">
+                    Rekap Misi: <strong>{skorMisiDisplay}</strong>
+                  </p>
                 </div>
 
-                <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
+                {/* Google Sheets Submission Status Indicator */}
+                {submissionStatus && (
+                  <div
+                    role="status"
+                    className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold shadow-xs ${
+                      isSubmittingScore
+                        ? 'bg-amber-400/90 text-amber-950'
+                        : 'bg-white/95 text-emerald-800'
+                    }`}
+                  >
+                    {isSubmittingScore ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    )}
+                    <span>{submissionStatus}</span>
+                  </div>
+                )}
+
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
                   <button
+                    type="button"
                     onClick={handleRetakeQuiz}
                     className="px-5 py-2.5 bg-white text-slate-800 hover:bg-slate-100 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition-colors"
                   >
@@ -451,6 +466,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                   </button>
 
                   <button
+                    type="button"
                     onClick={onBackToMap}
                     className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition-colors"
                   >
@@ -459,13 +475,33 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 </div>
               </div>
 
-              {/* Vanellope Celebration speech */}
+              {/* Dedicated Motivational Quote Card (Kaidah Pencacahan & Matematika) */}
+              {motivationQuote && (
+                <div className="bg-gradient-to-br from-pink-50 via-[#FFFDF9] to-amber-50 border-2 border-pink-200 rounded-3xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-500 to-amber-400 text-white flex items-center justify-center shadow-sm shrink-0">
+                      <Quote className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-pink-700">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Quote Motivasi Matematika • {motivationQuote.theme}</span>
+                      </div>
+                      <blockquote className="text-sm sm:text-base font-bold text-slate-800 leading-relaxed italic">
+                        "{motivationQuote.text}"
+                      </blockquote>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <VanellopeGuide
                 mood={finalScoreData.score >= 70 ? 'celebrating' : 'thinking'}
                 dialogue={
                   finalScoreData.score >= 80 ? (
                     <span>
-                      Hebat sekali! Kamu berhasil menyelesaikan kuis evaluasi dengan skor <strong>{finalScoreData.score}</strong>! Hasilmu telah dicatat dan terkirim ke sistem penilaian guru!
+                      Hebat sekali! Kamu berhasil menyelesaikan kuis evaluasi dengan skor{' '}
+                      <strong>{finalScoreData.score}</strong>! Data nilai & progres misimu telah terkirim ke Google Sheets guru!
                     </span>
                   ) : (
                     <span>
@@ -475,7 +511,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 }
               />
 
-              {/* Pembahasan Lengkap (Muncul Setelah Soal ke-10 Selesai Sesuai Ketentuan) */}
+              {/* Pembahasan Lengkap */}
               <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                   <div>
@@ -521,17 +557,13 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                           </span>
                         </div>
 
-                        <p className="font-medium text-slate-800 leading-relaxed">
-                          {q.question}
-                        </p>
+                        <p className="font-medium text-slate-800 leading-relaxed">{q.question}</p>
 
                         <div className="flex flex-wrap items-center gap-4 text-[11px] pt-1 border-t border-slate-200/60">
                           <div>
                             Jawabanmu:{' '}
                             <strong
-                              className={
-                                isCorrectAnswer ? 'text-emerald-700' : 'text-rose-700'
-                              }
+                              className={isCorrectAnswer ? 'text-emerald-700' : 'text-rose-700'}
                             >
                               {userPick || '(Tidak Dijawab)'}
                             </strong>
@@ -557,9 +589,8 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
           )}
         </div>
 
-        {/* RIGHT COLUMN: Top 5 Peringkat Kelas (Leaderboard Database Integration & Reset Guru) */}
+        {/* RIGHT COLUMN: Top 5 Peringkat Kelas */}
         <div className="lg:col-span-5 bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 shadow-md space-y-5">
-          {/* Header matching reference with Reset Guru button */}
           <div className="flex items-start justify-between pb-3 border-b border-slate-100 gap-2">
             <div>
               <h3 className="font-extrabold text-lg text-slate-900 font-candy flex items-center gap-2">
@@ -572,8 +603,8 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0">
-              {/* Reset Peringkat (Guru) button as requested */}
               <button
+                type="button"
                 onClick={() => {
                   setTeacherPinInput('');
                   setResetError('');
@@ -587,6 +618,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
               </button>
 
               <button
+                type="button"
                 onClick={loadLeaderboard}
                 disabled={isFetchingLeaderboard}
                 className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
@@ -599,7 +631,6 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
             </div>
           </div>
 
-          {/* Table / Empty State */}
           {leaderboardList.length === 0 ? (
             <div className="py-12 px-4 text-center rounded-2xl bg-[#FAF8F5] border border-dashed border-slate-300 space-y-2">
               <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
@@ -633,12 +664,9 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                       <tr
                         key={entry.id || idx}
                         className={`transition-colors ${
-                          isCurrentStudent
-                            ? 'bg-emerald-50/80 font-bold'
-                            : 'hover:bg-slate-50'
+                          isCurrentStudent ? 'bg-emerald-50/80 font-bold' : 'hover:bg-slate-50'
                         }`}
                       >
-                        {/* Rank # */}
                         <td className="py-3 px-2 text-center font-bold text-slate-700">
                           {entry.rank === 1 && (
                             <span className="w-6 h-6 mx-auto rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-extrabold">
@@ -655,12 +683,9 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                               3
                             </span>
                           )}
-                          {entry.rank > 3 && (
-                            <span className="text-slate-500">{entry.rank}</span>
-                          )}
+                          {entry.rank > 3 && <span className="text-slate-500">{entry.rank}</span>}
                         </td>
 
-                        {/* Name & Class with avatar */}
                         <td className="py-3 px-3">
                           <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-400 to-amber-300 text-white flex items-center justify-center text-xs font-bold shadow-2xs shrink-0">
@@ -670,24 +695,19 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                               <div className="font-extrabold text-slate-800 text-xs">
                                 {entry.name}
                               </div>
-                              <div className="text-[10px] text-slate-400">
-                                {entry.studentClass}
-                              </div>
+                              <div className="text-[10px] text-slate-400">{entry.studentClass}</div>
                             </div>
                           </div>
                         </td>
 
-                        {/* Score */}
                         <td className="py-3 px-2 text-center font-extrabold font-mono text-emerald-700">
                           {entry.score}
                         </td>
 
-                        {/* Duration */}
                         <td className="py-3 px-2 text-center font-mono text-[11px] text-slate-600">
                           {entry.timeStr}
                         </td>
 
-                        {/* Medals / Badge */}
                         <td className="py-3 px-2 text-center text-base">
                           {entry.rank === 1 && '🥇'}
                           {entry.rank === 2 && '🥈'}
@@ -707,17 +727,17 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
             <div className="font-bold text-slate-800 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <Database className="w-4 h-4 text-emerald-600" />
-                <span>Format Data Google Apps Script</span>
+                <span>Payload GOOGLE_SHEET_WEBAPP_URL</span>
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-mono">
                 JSON POST
               </span>
             </div>
             <p className="leading-relaxed">
-              Data yang dikirim: <code>{`{ nama, kelas, misi1, misi2, misi3, misi4, skorKuis, waktuSelesai, durasi }`}</code>
+              Field dikirim: <code>{`{ nama, kelas, jamMengerjakan, durasi, skorMisi, skorKuis }`}</code>
             </p>
             <div className="truncate font-mono text-[10px] text-slate-500 bg-white p-2 rounded-lg border border-slate-200">
-              {appsScriptUrl}
+              {webAppUrl}
             </div>
           </div>
         </div>
@@ -744,7 +764,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
             <p className="text-xs text-slate-600 leading-relaxed">
               Tindakan ini akan mengosongkan papan peringkat di layar dan memanggil endpoint reset Google Sheets:
               <br />
-              <code>{`${appsScriptUrl}?action=reset`}</code>
+              <code>{`${webAppUrl}?action=reset`}</code>
             </p>
 
             <div className="space-y-1.5">
@@ -815,7 +835,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
               </div>
               <div>
                 <h3 className="font-extrabold text-slate-900 text-base font-candy">
-                  Konfigurasi APPS_SCRIPT_URL
+                  Konfigurasi GOOGLE_SHEET_WEBAPP_URL
                 </h3>
                 <p className="text-xs text-slate-500">
                   Hubungkan dengan Google Sheets Web App milik guru / sekolah
@@ -835,7 +855,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono focus:border-emerald-500 focus:outline-none"
               />
               <p className="text-[11px] text-slate-500 leading-relaxed">
-                Format payload POST: <code>{`{ nama, kelas, misi1, misi2, misi3, misi4, skorKuis, waktuSelesai, durasi }`}</code>
+                Format payload POST: <code>{`{ nama, kelas, jamMengerjakan, durasi, skorMisi, skorKuis }`}</code>
               </p>
             </div>
 
@@ -850,7 +870,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  setAppsScriptUrl(tempUrlInput.trim());
+                  setWebAppUrl(tempUrlInput.trim());
                   setShowConfigModal(false);
                 }}
                 className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-colors"

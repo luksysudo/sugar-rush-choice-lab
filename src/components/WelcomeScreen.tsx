@@ -44,7 +44,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern flex flex-col justify-between p-4 sm:p-8">
+    <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern flex flex-col justify-between p-4 sm:p-8 pt-16 sm:pt-16">
       {/* Decorative floating candy header items */}
       <div className="max-w-5xl mx-auto w-full pt-4 pb-2 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-pink-100/80 text-pink-700 text-xs font-semibold uppercase tracking-wider mb-2 shadow-xs">
@@ -106,7 +106,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 </div>
               )}
 
-              {/* Action Buttons: Buku Panduan & Materi Prasyarat */}
+              {/* Action Buttons: Buku Panduan & Buku Materi */}
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <button
                   type="button"
@@ -123,7 +123,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                   className="flex items-center justify-center gap-2 py-2.5 px-3 bg-[#422006] hover:bg-[#582D0A] text-[#FEF3C7] rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
                 >
                   <Layers className="w-4 h-4 text-pink-400" />
-                  <span>MATERI PRASYARAT</span>
+                  <span>BUKU MATERI</span>
                 </button>
               </div>
 

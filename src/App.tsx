@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { Volume2, VolumeX } from 'lucide-react';
 import { StudentProfile, ScreenMode } from './types';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { CircuitMap } from './components/CircuitMap';
@@ -15,6 +16,7 @@ import { Mission4FoodGoCatering } from './components/Mission4FoodGoCatering';
 import { QuizAndLeaderboard } from './components/QuizAndLeaderboard';
 import { GuideModal } from './components/GuideModal';
 import { PrerequisiteModal } from './components/PrerequisiteModal';
+import { soundManager, playClickSound } from './utils/soundEffects';
 
 export default function App() {
   const [profile, setProfile] = useState<StudentProfile>(() => {
@@ -73,8 +75,30 @@ export default function App() {
     return null;
   });
 
+  const [hasReadMaterial, setHasReadMaterial] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('sugar_rush_has_read_material') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [isMuted, setIsMuted] = useState<boolean>(() => soundManager.isMuted());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isPrerequisiteOpen, setIsPrerequisiteOpen] = useState(false);
+
+  // Global button click sound via Web Audio API
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const btn = target?.closest('button:not(:disabled)');
+      if (!btn) return;
+      if (btn.getAttribute('data-sound-toggle') === 'true') return;
+      playClickSound();
+    };
+    document.addEventListener('click', handleGlobalClick);
+    return () => document.removeEventListener('click', handleGlobalClick);
+  }, []);
 
   // Check URL query parameters for ?autostart=1
   useEffect(() => {
@@ -83,6 +107,20 @@ export default function App() {
       setScreen('circuit_map');
     }
   }, []);
+
+  const handleToggleMute = () => {
+    const nextMuted = soundManager.toggleMute();
+    setIsMuted(nextMuted);
+  };
+
+  const handleConfirmReadMaterial = () => {
+    setHasReadMaterial(true);
+    try {
+      localStorage.setItem('sugar_rush_has_read_material', 'true');
+    } catch {
+      // ignore
+    }
+  };
 
   // Save changes to localStorage and record adventure start time
   const handleUpdateProfile = (newProfile: StudentProfile) => {
@@ -124,13 +162,37 @@ export default function App() {
       }
     }
 
-    // Critical Requirement: After completing a mission, system MUST return to Circuit Map
-    // so student clicks the next mission themselves!
     setScreen('circuit_map');
   };
 
   return (
-    <div className="min-h-screen text-slate-800 font-sans selection:bg-pink-200 selection:text-pink-900">
+    <div className="min-h-screen text-slate-800 font-sans selection:bg-pink-200 selection:text-pink-900 relative">
+      {/* Global Mute / Unmute Audio Toggle (Top-Right Corner) */}
+      <button
+        type="button"
+        data-sound-toggle="true"
+        onClick={handleToggleMute}
+        aria-label={isMuted ? 'Aktifkan Suara' : 'Bisukan Suara'}
+        title={isMuted ? 'Suara Bisu (Klik untuk Aktifkan)' : 'Suara Aktif (Klik untuk Bisukan)'}
+        className={`fixed top-3 right-3 z-40 px-3 py-2 rounded-2xl border-2 shadow-md flex items-center gap-1.5 text-xs font-extrabold transition-all active:scale-95 ${
+          isMuted
+            ? 'bg-slate-100 border-slate-300 text-slate-500 hover:bg-slate-200'
+            : 'bg-white/95 backdrop-blur-xs border-pink-200 text-pink-600 hover:border-pink-400 hover:bg-pink-50'
+        }`}
+      >
+        {isMuted ? (
+          <>
+            <VolumeX className="w-4 h-4" />
+            <span className="hidden sm:inline">Bisu</span>
+          </>
+        ) : (
+          <>
+            <Volume2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Suara</span>
+          </>
+        )}
+      </button>
+
       {screen === 'welcome' && (
         <WelcomeScreen
           initialProfile={profile}
@@ -146,14 +208,20 @@ export default function App() {
           completedMissions={completedMissions}
           stars={stars}
           points={points}
+          hasReadMaterial={hasReadMaterial}
           onSelectMission={(id) => {
+            if (!hasReadMaterial) return;
             if (id === 1) setScreen('mission_1');
             if (id === 2) setScreen('mission_2');
             if (id === 3) setScreen('mission_3');
             if (id === 4) setScreen('mission_4');
           }}
-          onOpenQuizLeaderboard={() => setScreen('quiz_leaderboard')}
+          onOpenQuizLeaderboard={() => {
+            if (!hasReadMaterial) return;
+            setScreen('quiz_leaderboard');
+          }}
           onOpenGuide={() => setIsGuideOpen(true)}
+          onOpenPrerequisites={() => setIsPrerequisiteOpen(true)}
           onBackToWelcome={() => setScreen('welcome')}
         />
       )}
@@ -208,6 +276,8 @@ export default function App() {
       <PrerequisiteModal
         isOpen={isPrerequisiteOpen}
         onClose={() => setIsPrerequisiteOpen(false)}
+        hasConfirmedRead={hasReadMaterial}
+        onConfirmRead={handleConfirmReadMaterial}
       />
     </div>
   );

@@ -24,6 +24,7 @@ import {
   verifyMission1Challenge1,
   verifyMission1Challenge2,
 } from '../utils/mathRules';
+import { playCorrectSound, playWrongSound } from '../utils/soundEffects';
 
 interface Mission1Props {
   profile: StudentProfile;
@@ -83,6 +84,7 @@ export const Mission1SnackShop: React.FC<Mission1Props> = ({
 
     if (correct) {
       setC1Correct(true);
+      playCorrectSound();
       try {
         confetti({
           particleCount: 70,
@@ -96,6 +98,7 @@ export const Mission1SnackShop: React.FC<Mission1Props> = ({
     } else {
       setC1Correct(false);
       setC1HintLevel((prev) => prev + 1);
+      playWrongSound();
     }
   };
 
@@ -107,6 +110,7 @@ export const Mission1SnackShop: React.FC<Mission1Props> = ({
 
     if (correct) {
       setC2Correct(true);
+      playCorrectSound();
       try {
         confetti({
           particleCount: 90,
@@ -120,11 +124,12 @@ export const Mission1SnackShop: React.FC<Mission1Props> = ({
     } else {
       setC2Correct(false);
       setC2HintLevel((prev) => prev + 1);
+      playWrongSound();
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern p-3 sm:p-6 pb-12 flex flex-col">
+    <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern p-3 sm:p-6 pt-16 sm:pt-16 pb-12 flex flex-col">
       {/* Top Navigation */}
       <div className="max-w-5xl mx-auto w-full mb-5">
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-pink-100 flex items-center justify-between">

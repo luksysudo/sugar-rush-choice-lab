@@ -6,21 +6,25 @@ import {
   verifyMission2Challenge1,
   verifyMission2Challenge2,
   verifyMission3Answer,
+  verifyMission3TreeMapping,
+  verifyMission3Challenge2Total,
   verifyFoodGoTantangan1Subtotals,
   verifyFoodGoTantangan1Total,
   verifyFoodGoTantangan2Subtotals,
   verifyFoodGoTantangan2Total,
   scoreQuiz,
+  getMathMotivationQuote,
+  formatJamMengerjakan,
+  formatDurationShort,
+  formatSkorMisi,
 } from './mathRules';
 import { QUIZ_QUESTIONS } from '../data/quizData';
 
 test('Misi 1: Tantangan 1 (Penjumlahan) & Tantangan 2 (Perkalian)', () => {
-  // 4 kue tar + 3 es krim + 2 puding = 9
   assert.equal(verifyMission1Challenge1(9), true);
   assert.equal(verifyMission1Challenge1('9'), true);
   assert.equal(verifyMission1Challenge1(12), false);
 
-  // 4 kue tar x 3 minuman = 12
   assert.equal(verifyMission1Challenge2(12), true);
   assert.equal(verifyMission1Challenge2('12'), true);
   assert.equal(verifyMission1Challenge2(7), false);
@@ -35,10 +39,40 @@ test('Misi 2: Tantangan 1 (Klasifikasi) & Tantangan 2 (Manekin 24)', () => {
   assert.equal(verifyMission2Challenge2(9), false);
 });
 
-test('Misi 3: Total rute tanpa bocoran = 6', () => {
+test('Misi 3: Tantangan 1 & Tantangan 2 Pemetaan Diagram Pohon (Total = 6)', () => {
   assert.equal(verifyMission3Answer(6), true);
   assert.equal(verifyMission3Answer('6'), true);
   assert.equal(verifyMission3Answer(5), false);
+
+  // Valid mapping: both P and C map K, M, V in any order
+  const validMap = verifyMission3TreeMapping({
+    branchP: ['K', 'M', 'V'],
+    branchC: ['V', 'K', 'M'],
+  });
+  assert.equal(validMap.pComplete, true);
+  assert.equal(validMap.cComplete, true);
+  assert.equal(validMap.isValid, true);
+
+  // Incomplete mapping
+  const incompleteMap = verifyMission3TreeMapping({
+    branchP: ['K', 'M', ''],
+    branchC: ['K', 'M', 'V'],
+  });
+  assert.equal(incompleteMap.pComplete, false);
+  assert.equal(incompleteMap.cComplete, true);
+  assert.equal(incompleteMap.isValid, false);
+
+  // Duplicate checkpoint on P branch should be invalid
+  const dupMap = verifyMission3TreeMapping({
+    branchP: ['K', 'K', 'V'],
+    branchC: ['K', 'M', 'V'],
+  });
+  assert.equal(dupMap.pComplete, false);
+  assert.equal(dupMap.isValid, false);
+
+  assert.equal(verifyMission3Challenge2Total(6), true);
+  assert.equal(verifyMission3Challenge2Total('6'), true);
+  assert.equal(verifyMission3Challenge2Total(5), false);
 });
 
 test('Misi 4: Tantangan 1 (Stok Awal = 15) & Tantangan 2 (Perubahan Stok = 13)', () => {
@@ -72,11 +106,9 @@ test('10 Soal Kuis Evaluasi: Semua jawaban < 100 dan penilaian 100%', () => {
   const fullKeys: Record<number, string> = {};
 
   QUIZ_QUESTIONS.forEach((q) => {
-    // Assert answer is < 100
     const expectedNum = expectedAnswers[q.id];
     assert.ok(expectedNum < 100, `Jawaban soal ${q.id} (${expectedNum}) harus < 100`);
 
-    // Verify option text matches expected answer
     const correctOption = q.options.find((opt) => opt.key === q.correctAnswer);
     assert.ok(correctOption, `Opsi jawaban benar untuk soal ${q.id} harus ada`);
     assert.equal(
@@ -88,13 +120,33 @@ test('10 Soal Kuis Evaluasi: Semua jawaban < 100 dan penilaian 100%', () => {
     fullKeys[q.id] = q.correctAnswer;
   });
 
-  // Score full keys
   const perfectResult = scoreQuiz(fullKeys, QUIZ_QUESTIONS);
   assert.equal(perfectResult.score, 100);
   assert.equal(perfectResult.correctCount, 10);
 
-  // Score partial keys
   const partialResult = scoreQuiz({ 1: 'A', 2: 'B' }, QUIZ_QUESTIONS);
   assert.equal(partialResult.score, 20);
   assert.equal(partialResult.correctCount, 2);
+});
+
+test('Quote Motivasi & Format Payload Google Sheets', () => {
+  const qHigh = getMathMotivationQuote(100);
+  assert.ok(qHigh.text.length > 20);
+  assert.ok(qHigh.theme.length > 0);
+
+  const qSeed = getMathMotivationQuote(80, 2);
+  assert.ok(qSeed.text.includes('Aturan perkalian'));
+
+  const sampleDate = new Date(2026, 4, 15, 9, 5, 3); // 15/05/2026 09:05:03
+  assert.equal(formatJamMengerjakan(sampleDate), '15/05/2026 09:05:03');
+  assert.equal(formatDurationShort(755), '12m 35d');
+  assert.equal(formatDurationShort(65), '1m 05d');
+  assert.equal(
+    formatSkorMisi([1, 3]),
+    'Misi 1: 50, Misi 2: 0, Misi 3: 50, Misi 4: 0 (Total: 100/200)'
+  );
+  assert.equal(
+    formatSkorMisi([1, 2, 3, 4]),
+    'Misi 1: 50, Misi 2: 50, Misi 3: 50, Misi 4: 50 (Total: 200/200)'
+  );
 });
