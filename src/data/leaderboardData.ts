@@ -105,6 +105,41 @@ export async function fetchTop5Leaderboard(
 }
 
 /**
+ * Direct Google Sheets Web App POST without application/json header
+ * to avoid CORS preflight blocking in browser.
+ */
+export async function postScorePayloadToGoogleSheets(
+  payload: ScorePayload,
+  webAppUrl = GOOGLE_SHEET_WEBAPP_URL
+): Promise<boolean> {
+  if (
+    !webAppUrl ||
+    !webAppUrl.startsWith('https://') ||
+    webAppUrl.includes('MOCK')
+  ) {
+    return false;
+  }
+
+  try {
+    await fetch(webAppUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({
+        nama: payload.nama,
+        kelas: payload.kelas,
+        jamMengerjakan: payload.jamMengerjakan,
+        durasi: payload.durasi,
+        skorMisi: payload.skorMisi,
+        skorKuis: payload.skorKuis,
+      }),
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Send test result to Google Sheets Web App via POST
  * JSON payload: { nama, kelas, jamMengerjakan, durasi, skorMisi, skorKuis }
  */
@@ -133,25 +168,8 @@ export async function submitScoreToDatabase(
     console.warn('Failed saving to localStorage:', err);
   }
 
-  // Attempt Google Sheets Web App POST
-  let isOnline = false;
-  if (
-    webAppUrl &&
-    webAppUrl.startsWith('https://') &&
-    !webAppUrl.includes('MOCK')
-  ) {
-    try {
-      await fetch(webAppUrl, {
-        method: 'POST',
-        mode: 'no-cors', // standard for Google Apps Script redirects
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      isOnline = true;
-    } catch {
-      isOnline = false;
-    }
-  }
+  // Attempt Google Sheets Web App POST (no application/json header)
+  const isOnline = await postScorePayloadToGoogleSheets(payload, webAppUrl);
 
   return { success: true, isOnline, updatedLeaderboard: updated.slice(0, 5) };
 }

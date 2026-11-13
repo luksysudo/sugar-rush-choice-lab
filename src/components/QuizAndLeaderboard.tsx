@@ -16,21 +16,22 @@ import {
   Clock,
   RotateCcw,
   Sparkles,
-  Settings,
   RefreshCw,
-  Database,
   ChevronRight,
   KeyRound,
   ShieldAlert,
   Quote,
   Loader2,
+  Send,
 } from 'lucide-react';
 import { StudentProfile, LeaderboardEntry } from '../types';
 import { QUIZ_QUESTIONS } from '../data/quizData';
 import {
   GOOGLE_SHEET_WEBAPP_URL,
+  ScorePayload,
   fetchTop5Leaderboard,
   submitScoreToDatabase,
+  postScorePayloadToGoogleSheets,
   resetLeaderboardDatabase,
 } from '../data/leaderboardData';
 import { VanellopeGuide } from './VanellopeGuide';
@@ -73,15 +74,14 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
   const [durasiPengerjaanStr, setDurasiPengerjaanStr] = useState('');
 
   // Leaderboard & Database State
-  const [webAppUrl, setWebAppUrl] = useState(GOOGLE_SHEET_WEBAPP_URL);
-  const [showConfigModal, setShowConfigModal] = useState(false);
-  const [tempUrlInput, setTempUrlInput] = useState(GOOGLE_SHEET_WEBAPP_URL);
   const [leaderboardList, setLeaderboardList] = useState<LeaderboardEntry[]>([]);
   const [isFetchingLeaderboard, setIsFetchingLeaderboard] = useState(false);
   const [dbStatusMessage, setDbStatusMessage] = useState('');
   const [hasSubmittedScore, setHasSubmittedScore] = useState(false);
   const [isSubmittingScore, setIsSubmittingScore] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<string>('');
+  const [deliveryLog, setDeliveryLog] = useState<string>('');
+  const [lastPayload, setLastPayload] = useState<ScorePayload | null>(null);
 
   // Reset Guru Modal State
   const [showResetModal, setShowResetModal] = useState(false);
@@ -92,7 +92,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
 
   useEffect(() => {
     loadLeaderboard();
-  }, [webAppUrl]);
+  }, []);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -117,7 +117,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
   const loadLeaderboard = async () => {
     setIsFetchingLeaderboard(true);
     try {
-      const res = await fetchTop5Leaderboard(webAppUrl);
+      const res = await fetchTop5Leaderboard(GOOGLE_SHEET_WEBAPP_URL);
       setLeaderboardList(res.data);
       if (res.data.length === 0) {
         setDbStatusMessage('Belum ada data peringkat untuk sesi ini.');
@@ -191,32 +191,78 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
       }
     }
 
+    const payload: ScorePayload = {
+      nama: profile.name || 'Pembalap Muda',
+      kelas: profile.studentClass || 'Umum',
+      jamMengerjakan,
+      durasi,
+      skorMisi,
+      skorKuis: score,
+    };
+    setLastPayload(payload);
+
     if (!hasSubmittedScore) {
       setHasSubmittedScore(true);
       setIsSubmittingScore(true);
-      setSubmissionStatus('Menyimpan data ke Google Sheets...');
-
-      const payload = {
-        nama: profile.name || 'Pembalap Muda',
-        kelas: profile.studentClass || 'Umum',
-        jamMengerjakan,
-        durasi,
-        skorMisi,
-        skorKuis: score,
-      };
+      setSubmissionStatus('Mengirim ke Google Sheets...');
+      setDeliveryLog(`Log Pengiriman: Mengirim data nilai ke Google Sheets (${jamMengerjakan})...`);
 
       try {
         const [res] = await Promise.all([
-          submitScoreToDatabase(payload, elapsedSeconds, webAppUrl),
+          submitScoreToDatabase(payload, elapsedSeconds, GOOGLE_SHEET_WEBAPP_URL),
           new Promise((resolve) => setTimeout(resolve, 600)),
         ]);
         setLeaderboardList(res.updatedLeaderboard);
-        setSubmissionStatus('Data nilai berhasil tercatat di Google Sheets!');
+        if (res.isOnline) {
+          setSubmissionStatus('Terkirim ke Google Sheets');
+          setDeliveryLog(
+            `Log Pengiriman: Terkirim ke Google Sheets (${formatJamMengerjakan(new Date())})`
+          );
+        } else {
+          setSubmissionStatus('Tersimpan lokal (klik Kirim Ulang untuk sinkron)');
+          setDeliveryLog(
+            'Log Pengiriman: Gagal mengirim otomatis. Klik "Kirim Ulang Nilai ke Guru" untuk mencoba lagi.'
+          );
+        }
       } catch {
-        setSubmissionStatus('Data nilai berhasil tercatat di Google Sheets!');
+        setSubmissionStatus('Tersimpan lokal (klik Kirim Ulang untuk sinkron)');
+        setDeliveryLog(
+          'Log Pengiriman: Gagal mengirim otomatis. Klik "Kirim Ulang Nilai ke Guru" untuk mencoba lagi.'
+        );
       } finally {
         setIsSubmittingScore(false);
       }
+    }
+  };
+
+  const handleManualResend = async () => {
+    if (!lastPayload || isSubmittingScore) return;
+    setIsSubmittingScore(true);
+    setSubmissionStatus('Mengirim ulang ke Google Sheets...');
+    setDeliveryLog(
+      `Log Pengiriman: Mengirim ulang nilai ke Google Sheets (${formatJamMengerjakan(new Date())})...`
+    );
+
+    try {
+      const ok = await postScorePayloadToGoogleSheets(lastPayload, GOOGLE_SHEET_WEBAPP_URL);
+      if (ok) {
+        setSubmissionStatus('Terkirim ke Google Sheets');
+        setDeliveryLog(
+          `Log Pengiriman: Terkirim ke Google Sheets (${formatJamMengerjakan(new Date())})`
+        );
+      } else {
+        setSubmissionStatus('Gagal kirim ulang ke Google Sheets');
+        setDeliveryLog(
+          'Log Pengiriman: Gagal mengirim ulang. Periksa koneksi internet lalu coba kembali.'
+        );
+      }
+    } catch {
+      setSubmissionStatus('Gagal kirim ulang ke Google Sheets');
+      setDeliveryLog(
+        'Log Pengiriman: Gagal mengirim ulang. Periksa koneksi internet lalu coba kembali.'
+      );
+    } finally {
+      setIsSubmittingScore(false);
     }
   };
 
@@ -232,6 +278,8 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
     setHasSubmittedScore(false);
     setIsSubmittingScore(false);
     setSubmissionStatus('');
+    setDeliveryLog('');
+    setLastPayload(null);
   };
 
   const handleExecuteReset = async () => {
@@ -244,7 +292,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
     setIsResetting(true);
 
     try {
-      await resetLeaderboardDatabase(webAppUrl);
+      await resetLeaderboardDatabase(GOOGLE_SHEET_WEBAPP_URL);
       setLeaderboardList([]);
       setDbStatusMessage('Belum ada data peringkat untuk sesi ini.');
       setResetSuccessMessage('Peringkat Top 5 berhasil direset untuk kelas berikutnya!');
@@ -288,19 +336,6 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
               <Clock className="w-4 h-4 text-slate-500" />
               <span>Waktu Sesi: {formatTimerDisplay(timerSeconds)}</span>
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setTempUrlInput(webAppUrl);
-                setShowConfigModal(true);
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
-              title="Konfigurasi GOOGLE_SHEET_WEBAPP_URL"
-            >
-              <Database className="w-3.5 h-3.5 text-pink-600" />
-              <span className="hidden sm:inline">Google Sheets URL</span>
-            </button>
           </div>
         </div>
       </div>
@@ -455,11 +490,21 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                   </div>
                 )}
 
-                <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-2.5">
+                  <button
+                    type="button"
+                    disabled={isSubmittingScore || !lastPayload}
+                    onClick={handleManualResend}
+                    className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 disabled:opacity-60 text-amber-950 rounded-xl text-xs font-extrabold shadow-sm flex items-center gap-1.5 transition-colors"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Kirim Ulang Nilai ke Guru</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={handleRetakeQuiz}
-                    className="px-5 py-2.5 bg-white text-slate-800 hover:bg-slate-100 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition-colors"
+                    className="px-4 py-2.5 bg-white text-slate-800 hover:bg-slate-100 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition-colors"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Ulangi Kuis</span>
@@ -468,11 +513,21 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                   <button
                     type="button"
                     onClick={onBackToMap}
-                    className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition-colors"
+                    className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition-colors"
                   >
                     Kembali ke Peta Sirkuit
                   </button>
                 </div>
+
+                {/* Small Delivery Log Text */}
+                {deliveryLog && (
+                  <p
+                    data-testid="sheets-delivery-log"
+                    className="text-[11px] font-mono text-white/90 bg-slate-900/20 rounded-xl px-3 py-1.5 inline-block"
+                  >
+                    {deliveryLog}
+                  </p>
+                )}
               </div>
 
               {/* Dedicated Motivational Quote Card (Kaidah Pencacahan & Matematika) */}
@@ -721,25 +776,6 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
               </table>
             </div>
           )}
-
-          {/* Database Integration Info Box */}
-          <div className="bg-[#FAF8F5] border border-slate-200 rounded-2xl p-4 text-[11px] text-slate-600 space-y-2">
-            <div className="font-bold text-slate-800 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <Database className="w-4 h-4 text-emerald-600" />
-                <span>Payload GOOGLE_SHEET_WEBAPP_URL</span>
-              </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-mono">
-                JSON POST
-              </span>
-            </div>
-            <p className="leading-relaxed">
-              Field dikirim: <code>{`{ nama, kelas, jamMengerjakan, durasi, skorMisi, skorKuis }`}</code>
-            </p>
-            <div className="truncate font-mono text-[10px] text-slate-500 bg-white p-2 rounded-lg border border-slate-200">
-              {webAppUrl}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -762,9 +798,7 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
             </div>
 
             <p className="text-xs text-slate-600 leading-relaxed">
-              Tindakan ini akan mengosongkan papan peringkat di layar dan memanggil endpoint reset Google Sheets:
-              <br />
-              <code>{`${webAppUrl}?action=reset`}</code>
+              Tindakan ini akan mengosongkan papan peringkat Top 5 untuk memulai sesi kelas berikutnya.
             </p>
 
             <div className="space-y-1.5">
@@ -819,63 +853,6 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                 ) : (
                   <span>Konfirmasi Reset</span>
                 )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Database URL Config Modal */}
-      {showConfigModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-pink-100 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center shrink-0">
-                <Settings className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-extrabold text-slate-900 text-base font-candy">
-                  Konfigurasi GOOGLE_SHEET_WEBAPP_URL
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Hubungkan dengan Google Sheets Web App milik guru / sekolah
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-700">
-                Web App URL (Google Apps Script):
-              </label>
-              <input
-                type="text"
-                value={tempUrlInput}
-                onChange={(e) => setTempUrlInput(e.target.value)}
-                placeholder="https://script.google.com/macros/s/.../exec"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono focus:border-emerald-500 focus:outline-none"
-              />
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Format payload POST: <code>{`{ nama, kelas, jamMengerjakan, durasi, skorMisi, skorKuis }`}</code>
-              </p>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowConfigModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setWebAppUrl(tempUrlInput.trim());
-                  setShowConfigModal(false);
-                }}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-colors"
-              >
-                Simpan & Hubungkan
               </button>
             </div>
           </div>

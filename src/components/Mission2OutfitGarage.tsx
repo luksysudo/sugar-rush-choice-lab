@@ -332,61 +332,14 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
         {/* -------------------- STAGE 2: SIMULASI MANEKIN -------------------- */}
         {currentStage === 2 && (
           <div className="space-y-6">
-            {/* 3-Column Studio Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-              {/* Left Column: Pilih Atasan (4 Opsi) */}
-              <div className="lg:col-span-4 bg-white rounded-3xl p-5 border-2 border-slate-200 shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                    <h3 className="font-extrabold text-sm text-slate-800 font-candy">
-                      Pilih Atasan (4 Opsi)
-                    </h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 bg-sky-50 text-sky-700 rounded-full border border-sky-200">
-                      k₁ = 4
-                    </span>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {tops.map((top) => {
-                      const isSelected = selectedTop === top.id;
-                      return (
-                        <button
-                          key={top.id}
-                          type="button"
-                          onClick={() => setSelectedTop(top.id as any)}
-                          className={`w-full p-3 rounded-2xl border-2 transition-all flex items-center justify-between text-left ${
-                            isSelected
-                              ? 'border-emerald-500 bg-emerald-50/70 shadow-sm ring-2 ring-emerald-400/20'
-                              : 'border-slate-200 hover:border-slate-300 bg-white'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{top.icon}</span>
-                            <div>
-                              <div className="text-xs font-extrabold text-slate-800">{top.name}</div>
-                              <div className="text-[10px] text-slate-500">{top.desc}</div>
-                            </div>
-                          </div>
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-emerald-600 bg-emerald-600' : 'border-slate-300'}`}>
-                            {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 italic text-center">
-                  Klik opsi atasan untuk memasangkannya pada manekin
-                </div>
-              </div>
-
-              {/* Center Column: Mannequin Avatar Studio */}
-              <div className="lg:col-span-4 bg-gradient-to-b from-slate-800 via-slate-800 to-slate-900 rounded-3xl p-5 border-2 border-slate-700 shadow-xl flex flex-col items-center justify-between text-white relative min-h-[420px] overflow-hidden">
+            {/* 2-Column Side-by-Side Studio Grid (Left Sticky Mannequin, Right Outfit Options) */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+              {/* Left Column: Sticky FIT-ROOM MANNEQUIN */}
+              <div className="md:col-span-5 md:sticky md:top-16 bg-gradient-to-b from-slate-800 via-slate-800 to-slate-900 rounded-3xl p-5 sm:p-6 border-2 border-slate-700 shadow-xl flex flex-col items-center justify-between text-white relative min-h-[440px] overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none" />
 
                 <div className="text-center z-10 w-full flex items-center justify-between px-2">
-                  <span className="text-[10px] font-mono tracking-widest uppercase text-teal-400">
+                  <span className="text-[11px] font-mono tracking-widest uppercase text-teal-400 font-bold">
                     FIT-ROOM MANNEQUIN
                   </span>
                   <button
@@ -399,7 +352,7 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
                       setSelectedBottom(b);
                       setSelectedShoes(s);
                     }}
-                    className="text-[10px] bg-slate-700 hover:bg-slate-600 text-slate-200 px-2 py-0.5 rounded-lg flex items-center gap-1 transition-colors"
+                    className="text-[11px] bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors"
                     title="Coba kombinasi acak"
                   >
                     <RefreshCw className="w-3 h-3" />
@@ -408,7 +361,7 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
                 </div>
 
                 {/* Mannequin Vector */}
-                <div className="relative my-auto flex flex-col items-center justify-center">
+                <div className="relative my-auto py-3 flex flex-col items-center justify-center">
                   <svg viewBox="0 0 200 320" className="w-48 h-72 sm:w-56 sm:h-80 drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <ellipse cx="100" cy="45" rx="20" ry="25" fill="#E2E8F0" />
                     <path d="M96 68 L104 68 L104 80 L96 80 Z" fill="#CBD5E1" />
@@ -516,39 +469,46 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
                   </svg>
                 </div>
 
-                <div className="z-10 bg-slate-800/90 border border-slate-600 rounded-xl px-3 py-1.5 text-center text-[11px] font-mono">
-                  <span className="text-teal-300">Set Aktif:</span> Top {selectedTop} + Bottom {selectedBottom} + Shoes {selectedShoes}
+                <div className="z-10 bg-slate-800/90 border border-slate-600 rounded-xl px-3.5 py-2 text-center text-xs font-mono w-full">
+                  <span className="text-teal-300 font-bold">Set Aktif:</span> Top {selectedTop} + Bottom {selectedBottom} + Shoes {selectedShoes}
                 </div>
               </div>
 
-              {/* Right Column: Bawahan & Sepatu */}
-              <div className="lg:col-span-4 bg-white rounded-3xl p-5 border-2 border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
-                <div>
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 mb-3">
-                    <h3 className="font-extrabold text-sm text-slate-800 font-candy">Pilih Bawahan (3 Opsi)</h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 bg-pink-50 text-pink-700 rounded-full border border-pink-200">
-                      k₂ = 3
+              {/* Right Column: All Outfit Selection Options (Atasan, Bawahan, Sepatu) */}
+              <div className="md:col-span-7 space-y-5">
+                {/* Pilih Atasan (4 Opsi) */}
+                <div className="bg-white rounded-3xl p-5 border-2 border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3.5">
+                    <h3 className="font-extrabold text-sm text-slate-800 font-candy">
+                      1. Pilih Atasan (4 Opsi)
+                    </h3>
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 bg-sky-50 text-sky-700 rounded-full border border-sky-200">
+                      k₁ = 4
                     </span>
                   </div>
-                  <div className="space-y-2">
-                    {bottoms.map((bottom) => {
-                      const isSelected = selectedBottom === bottom.id;
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {tops.map((top) => {
+                      const isSelected = selectedTop === top.id;
                       return (
                         <button
-                          key={bottom.id}
+                          key={top.id}
                           type="button"
-                          onClick={() => setSelectedBottom(bottom.id as any)}
-                          className={`w-full p-2.5 rounded-2xl border-2 transition-all flex items-center justify-between text-left ${
+                          onClick={() => setSelectedTop(top.id as any)}
+                          className={`w-full p-3 rounded-2xl border-2 transition-all flex items-center justify-between text-left ${
                             isSelected
-                              ? 'border-pink-500 bg-pink-50/70 shadow-sm ring-2 ring-pink-400/20'
+                              ? 'border-emerald-500 bg-emerald-50/70 shadow-sm ring-2 ring-emerald-400/20'
                               : 'border-slate-200 hover:border-slate-300 bg-white'
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <span className="text-xl">{bottom.icon}</span>
-                            <span className="text-xs font-bold text-slate-800">{bottom.name}</span>
+                            <span className="text-2xl">{top.icon}</span>
+                            <div>
+                              <div className="text-xs font-extrabold text-slate-800">{top.name}</div>
+                              <div className="text-[10px] text-slate-500">{top.desc}</div>
+                            </div>
                           </div>
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-pink-600 bg-pink-600' : 'border-slate-300'}`}>
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-emerald-600 bg-emerald-600' : 'border-slate-300'}`}>
                             {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                           </div>
                         </button>
@@ -557,14 +517,56 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
                   </div>
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 mb-3">
-                    <h3 className="font-extrabold text-sm text-slate-800 font-candy">Pilih Sepatu (2 Opsi)</h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full border border-amber-200">
+                {/* Pilih Bawahan (3 Opsi) */}
+                <div className="bg-white rounded-3xl p-5 border-2 border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3.5">
+                    <h3 className="font-extrabold text-sm text-slate-800 font-candy">
+                      2. Pilih Bawahan (3 Opsi)
+                    </h3>
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 bg-pink-50 text-pink-700 rounded-full border border-pink-200">
+                      k₂ = 3
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {bottoms.map((bottom) => {
+                      const isSelected = selectedBottom === bottom.id;
+                      return (
+                        <button
+                          key={bottom.id}
+                          type="button"
+                          onClick={() => setSelectedBottom(bottom.id as any)}
+                          className={`w-full p-3 rounded-2xl border-2 transition-all flex items-center justify-between text-left ${
+                            isSelected
+                              ? 'border-pink-500 bg-pink-50/70 shadow-sm ring-2 ring-pink-400/20'
+                              : 'border-slate-200 hover:border-slate-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{bottom.icon}</span>
+                            <span className="text-xs font-bold text-slate-800">{bottom.name}</span>
+                          </div>
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-pink-600 bg-pink-600' : 'border-slate-300'}`}>
+                            {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Pilih Sepatu (2 Opsi) */}
+                <div className="bg-white rounded-3xl p-5 border-2 border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3.5">
+                    <h3 className="font-extrabold text-sm text-slate-800 font-candy">
+                      3. Pilih Sepatu (2 Opsi)
+                    </h3>
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 bg-amber-50 text-amber-700 rounded-full border border-amber-200">
                       k₃ = 2
                     </span>
                   </div>
-                  <div className="space-y-2">
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {shoes.map((shoe) => {
                       const isSelected = selectedShoes === shoe.id;
                       return (
@@ -572,7 +574,7 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
                           key={shoe.id}
                           type="button"
                           onClick={() => setSelectedShoes(shoe.id as any)}
-                          className={`w-full p-2.5 rounded-2xl border-2 transition-all flex items-center justify-between text-left ${
+                          className={`w-full p-3 rounded-2xl border-2 transition-all flex items-center justify-between text-left ${
                             isSelected
                               ? 'border-amber-500 bg-amber-50/70 shadow-sm ring-2 ring-amber-400/20'
                               : 'border-slate-200 hover:border-slate-300 bg-white'
@@ -582,7 +584,7 @@ export const Mission2OutfitGarage: React.FC<Mission2Props> = ({
                             <span className="text-xl">{shoe.icon}</span>
                             <span className="text-xs font-bold text-slate-800">{shoe.name}</span>
                           </div>
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-amber-600 bg-amber-600' : 'border-slate-300'}`}>
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-amber-600 bg-amber-600' : 'border-slate-300'}`}>
                             {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                           </div>
                         </button>
