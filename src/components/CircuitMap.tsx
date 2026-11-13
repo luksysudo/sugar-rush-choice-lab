@@ -76,7 +76,7 @@ export const CircuitMap: React.FC<CircuitMapProps> = ({
       posNum: 3,
       title: 'PETA JALUR SIRKUIT',
       topic: 'Diagram Pohon',
-      desc: 'Telusuri dan petakan percabangan jalur balap dari Start ke Finis!',
+      desc: 'Telusuri jalur balap & petakan kombinasi rakitan mobil dengan diagram pohon!',
       tag: 'Pos 3',
       subtitle: 'Diagram Cabang Jalur',
     },

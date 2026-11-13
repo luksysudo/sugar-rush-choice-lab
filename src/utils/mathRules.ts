@@ -39,50 +39,104 @@ export function verifyMission2Challenge2(userInput: number | string): boolean {
 /**
  * Misi 3 – Peta Jalur Sirkuit (Diagram Pohon)
  * Tantangan 1: 2 jalur utama x 3 cabang = 6 rute
- * Tantangan 2: Memetakan Diagram Pohon Sendiri
- *   Start (S) -> P (K, M, V) & C (K, M, V) -> total = 6
+ * Tantangan 2: Merakit Modifikasi Mobil Balap (Diagram Pohon 3 Tingkat)
+ *   Bengkel -> Rangka (T, R) -> Ban (K, S) -> Spoiler (Y, L) => 2 x 2 x 2 = 8 kombinasi
  */
 export function verifyMission3Answer(userInput: number | string): boolean {
   const parsed = typeof userInput === 'string' ? parseInt(userInput.trim(), 10) : userInput;
   return parsed === 6; // 2 * 3 = 6
 }
 
-export type CheckpointCode = '' | 'K' | 'M' | 'V';
+export type TireCode = '' | 'K' | 'S';
+export type SpoilerCode = '' | 'Y' | 'L';
 
-export interface Mission3TreeMapping {
-  branchP: [CheckpointCode, CheckpointCode, CheckpointCode];
-  branchC: [CheckpointCode, CheckpointCode, CheckpointCode];
+export interface CarBranchMapping {
+  tires: [TireCode, TireCode];
+  spoilers: [[SpoilerCode, SpoilerCode], [SpoilerCode, SpoilerCode]];
 }
 
-export function verifyMission3TreeMapping(mapping: Mission3TreeMapping): {
-  pComplete: boolean;
-  cComplete: boolean;
+export interface Mission3CarTreeMapping {
+  turbo: CarBranchMapping;
+  rocket: CarBranchMapping;
+}
+
+function checkPair<T extends string>(
+  pair: [T, T],
+  required: [Exclude<T, ''>, Exclude<T, ''>]
+): { complete: boolean; hasDuplicate: boolean } {
+  const filled = pair.filter((v): v is Exclude<T, ''> => v !== '');
+  const hasDuplicate = new Set(filled).size !== filled.length;
+  const set = new Set(filled);
+  const complete =
+    pair.length === 2 &&
+    pair.every((v) => v !== '') &&
+    required.every((code) => set.has(code));
+  return { complete, hasDuplicate };
+}
+
+export function verifyMission3TreeMapping(mapping: Mission3CarTreeMapping): {
+  turboTiresComplete: boolean;
+  rocketTiresComplete: boolean;
+  turboSpoilersComplete: [boolean, boolean];
+  rocketSpoilersComplete: [boolean, boolean];
+  hasDuplicate: boolean;
+  combinations: string[];
   isValid: boolean;
 } {
-  const required: Exclude<CheckpointCode, ''>[] = ['K', 'M', 'V'];
-  const pSet = new Set(mapping.branchP.filter((v): v is Exclude<CheckpointCode, ''> => v !== ''));
-  const cSet = new Set(mapping.branchC.filter((v): v is Exclude<CheckpointCode, ''> => v !== ''));
+  const tTireRes = checkPair(mapping.turbo.tires, ['K', 'S']);
+  const rTireRes = checkPair(mapping.rocket.tires, ['K', 'S']);
 
-  const pComplete =
-    mapping.branchP.length === 3 &&
-    mapping.branchP.every((v) => v !== '') &&
-    required.every((code) => pSet.has(code));
+  const tSp0Res = checkPair(mapping.turbo.spoilers[0], ['Y', 'L']);
+  const tSp1Res = checkPair(mapping.turbo.spoilers[1], ['Y', 'L']);
+  const rSp0Res = checkPair(mapping.rocket.spoilers[0], ['Y', 'L']);
+  const rSp1Res = checkPair(mapping.rocket.spoilers[1], ['Y', 'L']);
 
-  const cComplete =
-    mapping.branchC.length === 3 &&
-    mapping.branchC.every((v) => v !== '') &&
-    required.every((code) => cSet.has(code));
+  const hasDuplicate =
+    tTireRes.hasDuplicate ||
+    rTireRes.hasDuplicate ||
+    tSp0Res.hasDuplicate ||
+    tSp1Res.hasDuplicate ||
+    rSp0Res.hasDuplicate ||
+    rSp1Res.hasDuplicate;
+
+  const combinations: string[] = [];
+  const frames: { code: 'T' | 'R'; branch: CarBranchMapping }[] = [
+    { code: 'T', branch: mapping.turbo },
+    { code: 'R', branch: mapping.rocket },
+  ];
+
+  for (const frame of frames) {
+    for (let ti = 0; ti < 2; ti++) {
+      const tire = frame.branch.tires[ti] || '?';
+      for (let si = 0; si < 2; si++) {
+        const spoiler = frame.branch.spoilers[ti][si] || '?';
+        combinations.push(`(${frame.code},${tire},${spoiler})`);
+      }
+    }
+  }
+
+  const isValid =
+    tTireRes.complete &&
+    rTireRes.complete &&
+    tSp0Res.complete &&
+    tSp1Res.complete &&
+    rSp0Res.complete &&
+    rSp1Res.complete;
 
   return {
-    pComplete,
-    cComplete,
-    isValid: pComplete && cComplete,
+    turboTiresComplete: tTireRes.complete,
+    rocketTiresComplete: rTireRes.complete,
+    turboSpoilersComplete: [tSp0Res.complete, tSp1Res.complete],
+    rocketSpoilersComplete: [rSp0Res.complete, rSp1Res.complete],
+    hasDuplicate,
+    combinations,
+    isValid,
   };
 }
 
 export function verifyMission3Challenge2Total(userInput: number | string): boolean {
   const parsed = typeof userInput === 'string' ? parseInt(userInput.trim(), 10) : userInput;
-  return parsed === 6; // 2 * 3 = 6
+  return parsed === 8; // 2 * 2 * 2 = 8
 }
 
 /**

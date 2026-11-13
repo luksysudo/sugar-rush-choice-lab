@@ -39,40 +39,79 @@ test('Misi 2: Tantangan 1 (Klasifikasi) & Tantangan 2 (Manekin 24)', () => {
   assert.equal(verifyMission2Challenge2(9), false);
 });
 
-test('Misi 3: Tantangan 1 & Tantangan 2 Pemetaan Diagram Pohon (Total = 6)', () => {
+test('Misi 3: Tantangan 1 (6) & Tantangan 2 Diagram Pohon 3 Tingkat Rakitan Mobil (Total = 8)', () => {
   assert.equal(verifyMission3Answer(6), true);
   assert.equal(verifyMission3Answer('6'), true);
   assert.equal(verifyMission3Answer(5), false);
 
-  // Valid mapping: both P and C map K, M, V in any order
+  // Valid 3-level mapping: T/R -> K/S -> Y/L (2 x 2 x 2 = 8)
   const validMap = verifyMission3TreeMapping({
-    branchP: ['K', 'M', 'V'],
-    branchC: ['V', 'K', 'M'],
+    turbo: {
+      tires: ['K', 'S'],
+      spoilers: [
+        ['Y', 'L'],
+        ['L', 'Y'],
+      ],
+    },
+    rocket: {
+      tires: ['S', 'K'],
+      spoilers: [
+        ['Y', 'L'],
+        ['Y', 'L'],
+      ],
+    },
   });
-  assert.equal(validMap.pComplete, true);
-  assert.equal(validMap.cComplete, true);
+  assert.equal(validMap.turboTiresComplete, true);
+  assert.equal(validMap.rocketTiresComplete, true);
+  assert.equal(validMap.hasDuplicate, false);
   assert.equal(validMap.isValid, true);
+  assert.equal(validMap.combinations.length, 8);
+  assert.equal(validMap.combinations[0], '(T,K,Y)');
 
   // Incomplete mapping
   const incompleteMap = verifyMission3TreeMapping({
-    branchP: ['K', 'M', ''],
-    branchC: ['K', 'M', 'V'],
+    turbo: {
+      tires: ['K', ''],
+      spoilers: [
+        ['Y', 'L'],
+        ['Y', 'L'],
+      ],
+    },
+    rocket: {
+      tires: ['K', 'S'],
+      spoilers: [
+        ['Y', 'L'],
+        ['Y', ''],
+      ],
+    },
   });
-  assert.equal(incompleteMap.pComplete, false);
-  assert.equal(incompleteMap.cComplete, true);
+  assert.equal(incompleteMap.turboTiresComplete, false);
+  assert.equal(incompleteMap.rocketTiresComplete, true);
   assert.equal(incompleteMap.isValid, false);
 
-  // Duplicate checkpoint on P branch should be invalid
+  // Duplicate tire or spoiler in same pair should be invalid
   const dupMap = verifyMission3TreeMapping({
-    branchP: ['K', 'K', 'V'],
-    branchC: ['K', 'M', 'V'],
+    turbo: {
+      tires: ['K', 'K'],
+      spoilers: [
+        ['Y', 'L'],
+        ['Y', 'L'],
+      ],
+    },
+    rocket: {
+      tires: ['K', 'S'],
+      spoilers: [
+        ['Y', 'Y'],
+        ['Y', 'L'],
+      ],
+    },
   });
-  assert.equal(dupMap.pComplete, false);
+  assert.equal(dupMap.hasDuplicate, true);
   assert.equal(dupMap.isValid, false);
 
-  assert.equal(verifyMission3Challenge2Total(6), true);
-  assert.equal(verifyMission3Challenge2Total('6'), true);
-  assert.equal(verifyMission3Challenge2Total(5), false);
+  assert.equal(verifyMission3Challenge2Total(8), true);
+  assert.equal(verifyMission3Challenge2Total('8'), true);
+  assert.equal(verifyMission3Challenge2Total(6), false);
 });
 
 test('Misi 4: Tantangan 1 (Stok Awal = 15) & Tantangan 2 (Perubahan Stok = 13)', () => {
