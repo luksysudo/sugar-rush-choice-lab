@@ -137,7 +137,9 @@ export const Mission3CircuitTree: React.FC<Mission3Props> = ({
     setCarMapping(nextMapping);
 
     const status = verifyMission3TreeMapping(nextMapping);
-    if (status.isValid && !mappingCelebrated) {
+    if (status.hasDuplicate) {
+      playWrongSound();
+    } else if (status.isValid && !mappingCelebrated) {
       setMappingCelebrated(true);
       playCorrectSound();
     }
@@ -165,7 +167,9 @@ export const Mission3CircuitTree: React.FC<Mission3Props> = ({
     setCarMapping(nextMapping);
 
     const status = verifyMission3TreeMapping(nextMapping);
-    if (status.isValid && !mappingCelebrated) {
+    if (status.hasDuplicate) {
+      playWrongSound();
+    } else if (status.isValid && !mappingCelebrated) {
       setMappingCelebrated(true);
       playCorrectSound();
     }
@@ -490,6 +494,22 @@ export const Mission3CircuitTree: React.FC<Mission3Props> = ({
                 </p>
               </div>
 
+              {/* Kotak Petunjuk Pemandu Vanellope Sebelum Mengisi Diagram Pohon */}
+              <div
+                data-testid="m3-c2-guide-box"
+                className="p-4 bg-emerald-50/70 border-2 border-emerald-200 rounded-2xl"
+              >
+                <VanellopeGuide
+                  mood="thinking"
+                  size="sm"
+                  dialogue={
+                    <span>
+                      <strong>Petunjuk Analisis Sebelum Memetakan:</strong> Perhatikan hubungan pilihannya: apakah kamu hanya memilih <strong>SATU alternatif saja</strong> (saling lepas ➔ jumlahkan), ataukah memilih <strong>semua bagian secara bertahap</strong> (Rangka <strong>DAN</strong> Ban <strong>DAN</strong> Spoiler secara berurutan ➔ kalikan)? Pastikan setiap cabang tingkat tidak ada pilihan yang terulang atau terlewat!
+                    </span>
+                  }
+                />
+              </div>
+
               {/* Interactive 3-Level Tree Builder Canvas */}
               <div className="overflow-x-auto py-2">
                 <div className="min-w-[860px] flex items-center justify-between relative px-4 py-6 bg-gradient-to-r from-slate-50 via-amber-50/20 to-emerald-50/30 rounded-2xl border border-slate-200 gap-3">
@@ -670,13 +690,22 @@ export const Mission3CircuitTree: React.FC<Mission3Props> = ({
                 </div>
               </div>
 
-              {/* Duplicate Warning */}
-              {mappingStatus.hasDuplicate && (
-                <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-xs font-semibold text-amber-900 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>
-                    Perhatian: Setiap pasangan cabang harus memuat pilihan yang berbeda! Pastikan cabang Ban memuat <strong>K dan S</strong>, serta tiap cabang Spoiler memuat <strong>Y dan L</strong>.
-                  </span>
+              {/* Specific Diagnostic Feedback for Node Placements */}
+              {mappingStatus.diagnostics.length > 0 && (
+                <div
+                  data-testid="m3-c2-node-diagnostics"
+                  role="alert"
+                  className="p-4 bg-amber-50 border-2 border-amber-300 rounded-2xl text-xs text-amber-950 space-y-2 animate-shake"
+                >
+                  <div className="flex items-center gap-2 font-extrabold text-amber-900">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>{mappingStatus.diagnosticHeadline}</span>
+                  </div>
+                  <ul className="list-disc pl-5 space-y-1 text-[11px] sm:text-xs font-medium text-amber-900/95 leading-relaxed">
+                    {mappingStatus.diagnostics.map((msg, idx) => (
+                      <li key={idx}>{msg}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
@@ -687,7 +716,7 @@ export const Mission3CircuitTree: React.FC<Mission3Props> = ({
                   <span className={mappingStatus.isValid ? 'text-emerald-700' : 'text-pink-600'}>
                     {mappingStatus.isValid
                       ? 'Seluruh cabang 3 tingkat lengkap terpetakan! ✓'
-                      : 'Lengkapi seluruh cabang Ban (K/S) dan Spoiler (Y/L) di atas'}
+                      : 'Lengkapi seluruh cabang Ban (K/S) dan Spoiler (Y/L) tanpa pengulangan'}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">

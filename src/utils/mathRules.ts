@@ -63,7 +63,7 @@ export interface Mission3CarTreeMapping {
 function checkPair<T extends string>(
   pair: [T, T],
   required: [Exclude<T, ''>, Exclude<T, ''>]
-): { complete: boolean; hasDuplicate: boolean } {
+): { complete: boolean; hasDuplicate: boolean; partialMissing: boolean } {
   const filled = pair.filter((v): v is Exclude<T, ''> => v !== '');
   const hasDuplicate = new Set(filled).size !== filled.length;
   const set = new Set(filled);
@@ -71,7 +71,8 @@ function checkPair<T extends string>(
     pair.length === 2 &&
     pair.every((v) => v !== '') &&
     required.every((code) => set.has(code));
-  return { complete, hasDuplicate };
+  const partialMissing = filled.length === 1;
+  return { complete, hasDuplicate, partialMissing };
 }
 
 export function verifyMission3TreeMapping(mapping: Mission3CarTreeMapping): {
@@ -80,6 +81,8 @@ export function verifyMission3TreeMapping(mapping: Mission3CarTreeMapping): {
   turboSpoilersComplete: [boolean, boolean];
   rocketSpoilersComplete: [boolean, boolean];
   hasDuplicate: boolean;
+  diagnostics: string[];
+  diagnosticHeadline: string;
   combinations: string[];
   isValid: boolean;
 } {
@@ -98,6 +101,55 @@ export function verifyMission3TreeMapping(mapping: Mission3CarTreeMapping): {
     tSp1Res.hasDuplicate ||
     rSp0Res.hasDuplicate ||
     rSp1Res.hasDuplicate;
+
+  const diagnostics: string[] = [];
+
+  if (tTireRes.hasDuplicate) {
+    diagnostics.push(
+      'Cabang Tingkat 2 (Ban — Rangka Turbo): Belum tepat! Pilihan ban terulang pada cabang yang sama. Pastikan 2 cabang ban memuat Karamel (K) dan Stroberi (S) tanpa pengulangan.'
+    );
+  } else if (tTireRes.partialMissing) {
+    diagnostics.push(
+      'Cabang Tingkat 2 (Ban — Rangka Turbo): Belum lengkap! Satu pilihan ban pada Rangka Turbo masih terlewat. Lengkapi menjadi 2 cabang berbeda (K dan S).'
+    );
+  }
+
+  if (rTireRes.hasDuplicate) {
+    diagnostics.push(
+      'Cabang Tingkat 2 (Ban — Rangka Roket): Belum tepat! Pilihan ban terulang pada cabang yang sama. Pastikan 2 cabang ban memuat Karamel (K) dan Stroberi (S) tanpa pengulangan.'
+    );
+  } else if (rTireRes.partialMissing) {
+    diagnostics.push(
+      'Cabang Tingkat 2 (Ban — Rangka Roket): Belum lengkap! Satu pilihan ban pada Rangka Roket masih terlewat. Lengkapi menjadi 2 cabang berbeda (K dan S).'
+    );
+  }
+
+  const spoilerChecks: {
+    frameName: string;
+    tireCode: TireCode;
+    slotNum: 1 | 2;
+    res: { complete: boolean; hasDuplicate: boolean; partialMissing: boolean };
+  }[] = [
+    { frameName: 'Rangka Turbo', tireCode: mapping.turbo.tires[0], slotNum: 1, res: tSp0Res },
+    { frameName: 'Rangka Turbo', tireCode: mapping.turbo.tires[1], slotNum: 2, res: tSp1Res },
+    { frameName: 'Rangka Roket', tireCode: mapping.rocket.tires[0], slotNum: 1, res: rSp0Res },
+    { frameName: 'Rangka Roket', tireCode: mapping.rocket.tires[1], slotNum: 2, res: rSp1Res },
+  ];
+
+  for (const item of spoilerChecks) {
+    const branchDesc = item.tireCode
+      ? `${item.frameName} • Ban ${item.tireCode}`
+      : `${item.frameName} • Cabang Ban ${item.slotNum}`;
+    if (item.res.hasDuplicate) {
+      diagnostics.push(
+        `Cabang Tingkat 3 (Spoiler — ${branchDesc}): Belum tepat! Pilihan spoiler terulang. Pastikan kedua cabang spoiler memuat Sayap (Y) dan Kilat (L) tanpa ada yang terulang.`
+      );
+    } else if (item.res.partialMissing) {
+      diagnostics.push(
+        `Cabang Tingkat 3 (Spoiler — ${branchDesc}): Belum lengkap! Satu cabang spoiler masih terlewat. Lengkapi dengan pilihan yang berbeda (Y dan L).`
+      );
+    }
+  }
 
   const combinations: string[] = [];
   const frames: { code: 'T' | 'R'; branch: CarBranchMapping }[] = [
@@ -123,12 +175,22 @@ export function verifyMission3TreeMapping(mapping: Mission3CarTreeMapping): {
     rSp0Res.complete &&
     rSp1Res.complete;
 
+  const diagnosticHeadline = isValid
+    ? 'Seluruh cabang 3 tingkat lengkap dan valid tanpa pilihan terulang!'
+    : hasDuplicate
+    ? 'Belum tepat! Periksa kembali jumlah cabang pada tingkat tersebut atau pastikan tidak ada pilihan yang terulang/terlewat.'
+    : diagnostics.length > 0
+    ? 'Belum tepat! Masih ada cabang yang belum lengkap atau pilihannya terlewat.'
+    : 'Lengkapi seluruh cabang Tingkat 2 (Ban: K & S) dan Tingkat 3 (Spoiler: Y & L) pada kedua rangka.';
+
   return {
     turboTiresComplete: tTireRes.complete,
     rocketTiresComplete: rTireRes.complete,
     turboSpoilersComplete: [tSp0Res.complete, tSp1Res.complete],
     rocketSpoilersComplete: [rSp0Res.complete, rSp1Res.complete],
     hasDuplicate,
+    diagnostics,
+    diagnosticHeadline,
     combinations,
     isValid,
   };

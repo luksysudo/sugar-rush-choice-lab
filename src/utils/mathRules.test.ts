@@ -65,11 +65,12 @@ test('Misi 3: Tantangan 1 (6) & Tantangan 2 Diagram Pohon 3 Tingkat Rakitan Mobi
   assert.equal(validMap.turboTiresComplete, true);
   assert.equal(validMap.rocketTiresComplete, true);
   assert.equal(validMap.hasDuplicate, false);
+  assert.equal(validMap.diagnostics.length, 0);
   assert.equal(validMap.isValid, true);
   assert.equal(validMap.combinations.length, 8);
   assert.equal(validMap.combinations[0], '(T,K,Y)');
 
-  // Incomplete mapping
+  // Incomplete mapping -> specific missing node diagnostics
   const incompleteMap = verifyMission3TreeMapping({
     turbo: {
       tires: ['K', ''],
@@ -89,8 +90,10 @@ test('Misi 3: Tantangan 1 (6) & Tantangan 2 Diagram Pohon 3 Tingkat Rakitan Mobi
   assert.equal(incompleteMap.turboTiresComplete, false);
   assert.equal(incompleteMap.rocketTiresComplete, true);
   assert.equal(incompleteMap.isValid, false);
+  assert.ok(incompleteMap.diagnostics.some((d) => d.includes('Rangka Turbo')));
+  assert.ok(incompleteMap.diagnostics.some((d) => d.includes('Rangka Roket')));
 
-  // Duplicate tire or spoiler in same pair should be invalid
+  // Duplicate tire or spoiler in same pair should be invalid with specific diagnostic feedback
   const dupMap = verifyMission3TreeMapping({
     turbo: {
       tires: ['K', 'K'],
@@ -109,6 +112,9 @@ test('Misi 3: Tantangan 1 (6) & Tantangan 2 Diagram Pohon 3 Tingkat Rakitan Mobi
   });
   assert.equal(dupMap.hasDuplicate, true);
   assert.equal(dupMap.isValid, false);
+  assert.ok(dupMap.diagnosticHeadline.includes('Belum tepat!'));
+  assert.ok(dupMap.diagnostics.some((d) => d.includes('Ban — Rangka Turbo')));
+  assert.ok(dupMap.diagnostics.some((d) => d.includes('Spoiler — Rangka Roket')));
 
   assert.equal(verifyMission3Challenge2Total(8), true);
   assert.equal(verifyMission3Challenge2Total('8'), true);

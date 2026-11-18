@@ -35,6 +35,7 @@ import {
   resetLeaderboardDatabase,
 } from '../data/leaderboardData';
 import { VanellopeGuide } from './VanellopeGuide';
+import { CoreSummaryCard } from './CoreSummaryCard';
 import {
   scoreQuiz,
   shuffleQuizQuestions,
@@ -612,11 +613,14 @@ export const QuizAndLeaderboard: React.FC<QuizAndLeaderboardProps> = ({
                     </span>
                   ) : (
                     <span>
-                      Kerja bagus sudah menyelesaikan kuis! Pelajari pembahasan lengkap di bawah ini untuk mendalami kaidah pencacahan dengan lebih matang!
+                      Kerja bagus sudah menyelesaikan kuis! Pelajari rangkuman utama dan pembahasan lengkap di bawah ini untuk mendalami kaidah pencacahan dengan lebih matang!
                     </span>
                   )
                 }
               />
+
+              {/* Rangkuman Utama Sugar Rush: Choice Lab */}
+              <CoreSummaryCard context="post_quiz" />
 
               {/* Pembahasan Lengkap */}
               <div className="space-y-4 pt-2">

@@ -4,19 +4,40 @@
  * SUGAR RUSH: CHOICE LAB - Kaidah Pencacahan SMA Kelas 12
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import { StudentProfile, ScreenMode } from './types';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { CircuitMap } from './components/CircuitMap';
-import { Mission1SnackShop } from './components/Mission1SnackShop';
-import { Mission2OutfitGarage } from './components/Mission2OutfitGarage';
-import { Mission3CircuitTree } from './components/Mission3CircuitTree';
-import { Mission4FoodGoCatering } from './components/Mission4FoodGoCatering';
-import { QuizAndLeaderboard } from './components/QuizAndLeaderboard';
-import { GuideModal } from './components/GuideModal';
 import { PrerequisiteModal } from './components/PrerequisiteModal';
 import { soundManager, playClickSound } from './utils/soundEffects';
+
+const Mission1SnackShop = lazy(() =>
+  import('./components/Mission1SnackShop').then((m) => ({ default: m.Mission1SnackShop }))
+);
+const Mission2OutfitGarage = lazy(() =>
+  import('./components/Mission2OutfitGarage').then((m) => ({ default: m.Mission2OutfitGarage }))
+);
+const Mission3CircuitTree = lazy(() =>
+  import('./components/Mission3CircuitTree').then((m) => ({ default: m.Mission3CircuitTree }))
+);
+const Mission4FoodGoCatering = lazy(() =>
+  import('./components/Mission4FoodGoCatering').then((m) => ({ default: m.Mission4FoodGoCatering }))
+);
+const QuizAndLeaderboard = lazy(() =>
+  import('./components/QuizAndLeaderboard').then((m) => ({ default: m.QuizAndLeaderboard }))
+);
+const GuideModal = lazy(() =>
+  import('./components/GuideModal').then((m) => ({ default: m.GuideModal }))
+);
+
+const LazyScreenFallback = () => (
+  <div className="min-h-screen bg-[#FFFDF9] bg-candy-pattern flex items-center justify-center p-6">
+    <div className="bg-white border-2 border-pink-200 rounded-3xl px-6 py-4 shadow-md text-sm font-bold text-slate-700">
+      Memuat arena Sugar Rush...
+    </div>
+  </div>
+);
 
 export default function App() {
   const [profile, setProfile] = useState<StudentProfile>(() => {
@@ -226,52 +247,56 @@ export default function App() {
         />
       )}
 
-      {screen === 'mission_1' && (
-        <Mission1SnackShop
-          profile={profile}
-          onComplete={() => handleCompleteMission(1)}
-          onBackToMap={() => setScreen('circuit_map')}
-        />
-      )}
+      <Suspense fallback={<LazyScreenFallback />}>
+        {screen === 'mission_1' && (
+          <Mission1SnackShop
+            profile={profile}
+            onComplete={() => handleCompleteMission(1)}
+            onBackToMap={() => setScreen('circuit_map')}
+          />
+        )}
 
-      {screen === 'mission_2' && (
-        <Mission2OutfitGarage
-          profile={profile}
-          onComplete={() => handleCompleteMission(2)}
-          onBackToMap={() => setScreen('circuit_map')}
-        />
-      )}
+        {screen === 'mission_2' && (
+          <Mission2OutfitGarage
+            profile={profile}
+            onComplete={() => handleCompleteMission(2)}
+            onBackToMap={() => setScreen('circuit_map')}
+          />
+        )}
 
-      {screen === 'mission_3' && (
-        <Mission3CircuitTree
-          profile={profile}
-          onComplete={() => handleCompleteMission(3)}
-          onBackToMap={() => setScreen('circuit_map')}
-        />
-      )}
+        {screen === 'mission_3' && (
+          <Mission3CircuitTree
+            profile={profile}
+            onComplete={() => handleCompleteMission(3)}
+            onBackToMap={() => setScreen('circuit_map')}
+          />
+        )}
 
-      {screen === 'mission_4' && (
-        <Mission4FoodGoCatering
-          profile={profile}
-          onComplete={() => handleCompleteMission(4)}
-          onBackToMap={() => setScreen('circuit_map')}
-        />
-      )}
+        {screen === 'mission_4' && (
+          <Mission4FoodGoCatering
+            profile={profile}
+            onComplete={() => handleCompleteMission(4)}
+            onBackToMap={() => setScreen('circuit_map')}
+          />
+        )}
 
-      {screen === 'quiz_leaderboard' && (
-        <QuizAndLeaderboard
-          profile={profile}
-          completedMissions={completedMissions}
-          adventureStartTime={adventureStartTime}
-          onBackToMap={() => setScreen('circuit_map')}
-        />
-      )}
+        {screen === 'quiz_leaderboard' && (
+          <QuizAndLeaderboard
+            profile={profile}
+            completedMissions={completedMissions}
+            adventureStartTime={adventureStartTime}
+            onBackToMap={() => setScreen('circuit_map')}
+          />
+        )}
 
-      {/* Global Modals */}
-      <GuideModal
-        isOpen={isGuideOpen}
-        onClose={() => setIsGuideOpen(false)}
-      />
+        {/* Global Modals */}
+        {isGuideOpen && (
+          <GuideModal
+            isOpen={isGuideOpen}
+            onClose={() => setIsGuideOpen(false)}
+          />
+        )}
+      </Suspense>
 
       <PrerequisiteModal
         isOpen={isPrerequisiteOpen}

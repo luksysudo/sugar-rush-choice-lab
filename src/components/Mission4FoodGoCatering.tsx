@@ -479,8 +479,8 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
         {/* -------------------- STAGE 2: ANALISIS PERUBAHAN STOK -------------------- */}
         {currentStage === 2 && (
           <form onSubmit={handleCheckTantangan2} className="space-y-6">
-            {/* Vanellope Clear Step-by-Step Instructions */}
-            <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-purple-100">
+            {/* Vanellope Clear Step-by-Step Instructions + Paket Spesial Guide */}
+            <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-purple-100 space-y-3">
               <VanellopeGuide
                 mood={t2TotalCorrect ? 'celebrating' : t2Checked ? 'hint' : 'thinking'}
                 dialogue={
@@ -490,14 +490,23 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
                     </span>
                   ) : (
                     <span>
-                      "Sekarang terjadi perubahan stok di katering! <strong>Pertama</strong>, hitung ulang subtotal tiap paket di kotak bawah masing-masing kartu (<strong>Paket Sehat</strong> berkurang 1 minuman, <strong>Paket Hemat</strong> larangan dibuka sehingga bebas dipasangkan, dan <strong>Paket Spesial</strong> ikuti syarat khusus Makanan 1 + Makanan 2). <strong>Terakhir</strong>, jumlahkan ketiga subtotal pada kotak <strong>Langkah Akhir</strong> di bawah!"
+                      "Sekarang terjadi perubahan stok di katering! Amati daftar rincian menu yang tersedia pada tiap kartu, lalu isi kotak <strong>Subtotal Paket</strong> di bawah setiap kartu dan jumlahkan pada kotak <strong>Langkah Akhir</strong>!"
                     </span>
                   )
                 }
               />
+
+              {!t2TotalCorrect && (
+                <div
+                  data-testid="m4-c2-spesial-guide"
+                  className="p-3.5 bg-purple-50/80 border-2 border-purple-200 rounded-2xl text-xs text-purple-950 leading-relaxed"
+                >
+                  <strong>Petunjuk Pemandu (Analisis Paket Spesial):</strong> Perhatikan hubungan pilihannya: apakah kamu hanya memilih <strong>SATU alternatif paket saja</strong> (<em>Steakette Wagyu + pasangannya</em> <strong>ATAU</strong> <em>Salmon Teriyaki + pasangannya</em>, saling lepas ➔ <strong>jumlahkan</strong>), ataukah memilih semua bagian secara bertahap (<strong>kalikan</strong>)?
+                </div>
+              )}
             </div>
 
-            {/* 3 Package Cards with High-Contrast Subtotal Input at Card Bottom */}
+            {/* 3 Package Cards with Explicit Bulleted Menu Breakdown & High-Contrast Subtotal Input */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Paket Sehat (1 minuman habis) */}
               <div className="bg-white rounded-3xl p-5 border-2 border-emerald-300 shadow-sm flex flex-col justify-between">
@@ -511,15 +520,24 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
                       Stok Berubah
                     </span>
                   </div>
-                  <div className="space-y-2 text-xs text-slate-700">
-                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                      <strong>Makanan:</strong> 2 pilihan
+                  <div className="space-y-2.5 text-xs text-slate-700" data-testid="m4-t2-sehat-list">
+                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                      <div className="font-extrabold text-slate-900 mb-1">Daftar Makanan (2 pilihan):</div>
+                      <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
+                        <li>Salad Buah</li>
+                        <li>Sandwich Gandum</li>
+                      </ul>
                     </div>
-                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                      <strong>Minuman:</strong> 2 pilihan (1 minuman habis dari semula 3)
+                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                      <div className="font-extrabold text-slate-900 mb-1">Daftar Minuman (tersisa 2 pilihan):</div>
+                      <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
+                        <li>Infused Water <span className="text-emerald-700 font-bold">(Tersedia)</span></li>
+                        <li>Jus Apel <span className="text-emerald-700 font-bold">(Tersedia)</span></li>
+                        <li className="line-through text-slate-400">Teh Hijau (Habis)</li>
+                      </ul>
                     </div>
                     <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-950 text-[11px] font-medium">
-                      Kondisi: Tersisa 2 makanan & 2 minuman bebas dipasangkan.
+                      <strong>Aturan Paket:</strong> Pilih 1 Makanan <strong>DAN</strong> 1 Minuman yang tersedia bebas dipasangkan.
                     </div>
                   </div>
                 </div>
@@ -571,15 +589,24 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
                       Batasan Dibuka
                     </span>
                   </div>
-                  <div className="space-y-2 text-xs text-slate-700">
-                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                      <strong>Makanan:</strong> 3 pilihan
+                  <div className="space-y-2.5 text-xs text-slate-700" data-testid="m4-t2-hemat-list">
+                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                      <div className="font-extrabold text-slate-900 mb-1">Daftar Makanan (3 pilihan):</div>
+                      <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
+                        <li>Nasi Bento</li>
+                        <li>Burger Mini</li>
+                        <li>Kentang Madu</li>
+                      </ul>
                     </div>
-                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                      <strong>Minuman:</strong> 2 pilihan
+                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                      <div className="font-extrabold text-slate-900 mb-1">Daftar Minuman (2 pilihan):</div>
+                      <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
+                        <li>Teh Manis</li>
+                        <li>Es Lemon</li>
+                      </ul>
                     </div>
                     <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-950 text-[11px] font-medium">
-                      Kondisi: <strong>Pasangan terlarang dibuka penuh</strong>, semua boleh dipasangkan.
+                      <strong>Aturan Paket:</strong> Larangan sebelumnya dibuka penuh — pilih 1 Makanan <strong>DAN</strong> 1 Minuman bebas dipasangkan.
                     </div>
                   </div>
                 </div>
@@ -631,15 +658,37 @@ export const Mission4FoodGoCatering: React.FC<Mission4Props> = ({
                       Syarat Baru
                     </span>
                   </div>
-                  <div className="space-y-2 text-xs text-slate-700">
-                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                      <strong>Makanan 1:</strong> Hanya dapat dipadukan dengan 2 minuman
-                    </div>
-                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                      <strong>Makanan 2:</strong> Hanya dapat dipadukan dengan 1 minuman khusus
+                  <div className="space-y-2.5 text-xs text-slate-700" data-testid="m4-t2-spesial-list">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-[11px] border-collapse bg-slate-50 rounded-xl overflow-hidden">
+                        <thead>
+                          <tr className="bg-purple-100 text-purple-950 font-extrabold text-left">
+                            <th className="border border-purple-200 px-2.5 py-1.5">Pilihan Makanan</th>
+                            <th className="border border-purple-200 px-2.5 py-1.5">Minuman yang Boleh Dipadukan</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="border border-purple-200 px-2.5 py-1.5 font-bold text-slate-900">
+                              1. Steakette Wagyu
+                            </td>
+                            <td className="border border-purple-200 px-2.5 py-1.5">
+                              <strong>2 minuman:</strong> Ocha Dingin, Boba Milk Tea
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="border border-purple-200 px-2.5 py-1.5 font-bold text-slate-900">
+                              2. Salmon Teriyaki
+                            </td>
+                            <td className="border border-purple-200 px-2.5 py-1.5">
+                              <strong>1 minuman khusus:</strong> Ocha Dingin saja
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                     <div className="p-2.5 bg-purple-50 border border-purple-200 rounded-xl text-purple-950 text-[11px] font-medium">
-                      Kondisi: Jumlahkan kemungkinan pasangan Makanan 1 + Makanan 2.
+                      <strong>Aturan Paket:</strong> Pemesan hanya memilih <strong>SATU</strong> menu makanan di atas beserta minuman pasangannya (Steakette Wagyu <em>ATAU</em> Salmon Teriyaki).
                     </div>
                   </div>
                 </div>

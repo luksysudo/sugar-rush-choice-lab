@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { StudentProfile } from '../types';
 import { VanellopeGuide } from './VanellopeGuide';
+import { CoreSummaryCard } from './CoreSummaryCard';
 import {
   Mission1Illustration,
   Mission2Illustration,
@@ -356,6 +357,9 @@ export const CircuitMap: React.FC<CircuitMapProps> = ({
             );
           })}
         </div>
+
+        {/* Layar/Kartu Rangkuman Utama sebelum masuk Kuis Evaluasi (muncul saat semua 4 misi tuntas) */}
+        {hasReadMaterial && allCompleted && <CoreSummaryCard context="pre_quiz" />}
 
         {/* Bottom Section: Vanellope Dialogue & Kuis Evaluasi Launcher */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center bg-white rounded-3xl p-5 sm:p-6 shadow-md border border-pink-100">

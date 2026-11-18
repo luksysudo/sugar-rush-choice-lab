@@ -32,6 +32,7 @@ const MATERIAL_TABS = [
   { id: 2, label: '2. Aturan Perkalian', shortTitle: 'Aturan Perkalian' },
   { id: 3, label: '3. Aturan Penjumlahan', shortTitle: 'Aturan Penjumlahan' },
   { id: 4, label: '4. Perbandingan', shortTitle: 'Tabel Perbandingan' },
+  { id: 5, label: '5. Pengisian Tempat', shortTitle: 'Menyusun Bilangan' },
 ] as const;
 
 export const PrerequisiteModal: React.FC<PrerequisiteModalProps> = ({
@@ -61,7 +62,7 @@ export const PrerequisiteModal: React.FC<PrerequisiteModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/45 backdrop-blur-xs">
-      <div className="relative w-full max-w-3xl bg-white rounded-3xl p-5 sm:p-8 shadow-2xl border border-pink-100 max-h-[92vh] flex flex-col">
+      <div className="relative w-full max-w-4xl bg-white rounded-3xl p-5 sm:p-8 shadow-2xl border border-pink-100 max-h-[92vh] flex flex-col">
         {/* Close Button */}
         <button
           type="button"
@@ -102,8 +103,8 @@ export const PrerequisiteModal: React.FC<PrerequisiteModalProps> = ({
           </div>
         </div>
 
-        {/* 4 Interactive Navigation Tabs */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4" role="tablist" aria-label="Bagian Buku Materi">
+        {/* 5 Interactive Navigation Tabs */}
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4" role="tablist" aria-label="Bagian Buku Materi">
           {MATERIAL_TABS.map((tab) => {
             const isActive = activeTab === tab.id;
             const isVisited = visitedTabs.includes(tab.id);
@@ -114,7 +115,7 @@ export const PrerequisiteModal: React.FC<PrerequisiteModalProps> = ({
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => handleSelectTab(tab.id)}
-                className={`px-3 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center justify-between gap-1.5 border-2 ${
+                className={`px-2.5 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 border-2 grow sm:grow-0 ${
                   isActive
                     ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
                     : isVisited
@@ -122,7 +123,7 @@ export const PrerequisiteModal: React.FC<PrerequisiteModalProps> = ({
                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-pink-300 hover:bg-pink-50/40'
                 }`}
               >
-                <span className="truncate">{tab.label}</span>
+                <span className="whitespace-nowrap">{tab.label}</span>
                 {isVisited && (
                   <CheckCircle2
                     className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-emerald-600'}`}
@@ -409,76 +410,221 @@ export const PrerequisiteModal: React.FC<PrerequisiteModalProps> = ({
             </div>
           )}
 
-          {/* TAB 4: Tabel Perbandingan Utama */}
+          {/* TAB 4: Perbandingan Langsung + Tabel Perbandingan Utama */}
           {activeTab === 4 && (
-            <div className="p-5 bg-white border-2 border-slate-200 rounded-2xl shadow-xs space-y-3">
-              <div className="flex items-center gap-2 font-extrabold text-slate-900 text-base font-candy">
-                <ArrowRightLeft className="w-5 h-5 text-emerald-600" />
-                <span>Tabel Perbandingan: Aturan Perkalian vs. Aturan Penjumlahan</span>
+            <div className="space-y-4">
+              {/* Perbandingan Langsung: Kapan Dijumlahkan vs. Kapan Dikalikan? */}
+              <div
+                data-testid="direct-comparison-examples"
+                className="p-4 sm:p-5 bg-gradient-to-br from-[#FFFDF9] to-emerald-50/40 border-2 border-emerald-200 rounded-2xl shadow-xs space-y-3"
+              >
+                <div>
+                  <h4 className="font-extrabold text-slate-900 text-sm sm:text-base font-candy">
+                    Perbandingan Langsung: Kapan Dijumlahkan vs. Kapan Dikalikan?
+                  </h4>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Amati perbedaan dua situasi berikut agar tidak tertukar saat membaca soal cerita:
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  {/* Contoh 1: Dijumlahkan (Saling Lepas) */}
+                  <div className="bg-white border-2 border-pink-200 rounded-xl p-3.5 space-y-2">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-800 text-[11px] font-extrabold uppercase">
+                      Dijumlahkan (+) • Saling Lepas ("ATAU")
+                    </div>
+                    <p className="text-xs text-slate-800 font-semibold leading-relaxed">
+                      Situasi: Di garasi tersedia <strong>3 sepeda motor</strong> dan <strong>2 mobil</strong>. Kamu hanya memilih <strong>1 kendaraan saja</strong> untuk berangkat ke sekolah.
+                    </p>
+                    <div className="p-2 bg-pink-50/70 rounded-lg border border-pink-100 font-mono text-xs font-extrabold text-pink-900 text-center">
+                      3 + 2 = 5 pilihan kendaraan
+                    </div>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      <strong>Alasan Logis:</strong> Kamu tidak mungkin mengendarai motor dan mobil secara bersamaan. Memilih salah satu alternatif (motor <em>ATAU</em> mobil) sudah menuntaskan pilihan.
+                    </p>
+                  </div>
+
+                  {/* Contoh 2: Dikalikan (Bertahap Berurutan) */}
+                  <div className="bg-white border-2 border-sky-200 rounded-xl p-3.5 space-y-2">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 text-[11px] font-extrabold uppercase">
+                      Dikalikan (×) • Bertahap ("DAN")
+                    </div>
+                    <p className="text-xs text-slate-800 font-semibold leading-relaxed">
+                      Situasi: Kamu memiliki <strong>3 kemeja</strong> dan <strong>2 celana</strong>. Kamu harus memakai <strong>1 kemeja DAN 1 celana</strong> sebagai satu setelan seragam lengkap.
+                    </p>
+                    <div className="p-2 bg-sky-50/70 rounded-lg border border-sky-100 font-mono text-xs font-extrabold text-sky-900 text-center">
+                      3 × 2 = 6 pasangan seragam
+                    </div>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      <strong>Alasan Logis:</strong> Memilih kemeja saja belum selesai—setiap kemeja masih harus dipasangkan lagi dengan celana secara bertahap agar menjadi satu setelan utuh.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-slate-100 text-slate-800 font-extrabold border-b border-slate-300">
-                      <th className="py-2.5 px-3 border border-slate-200 w-1/4">Aspek Pembanding</th>
-                      <th className="py-2.5 px-3 border border-slate-200 w-3/8 text-sky-900 bg-sky-50/50">
-                        Aturan Perkalian
-                      </th>
-                      <th className="py-2.5 px-3 border border-slate-200 w-3/8 text-pink-900 bg-pink-50/50">
-                        Aturan Penjumlahan
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 text-slate-700">
-                    <tr>
-                      <td className="py-3 px-3 font-bold bg-slate-50 border border-slate-200">
-                        Sifat Kejadian
-                      </td>
-                      <td className="py-3 px-3 border border-slate-200 leading-relaxed">
-                        Digunakan untuk kejadian yang <strong>terjadi bersamaan</strong> atau{' '}
-                        <strong>berurutan</strong> (berpasangan secara simultan).
-                      </td>
-                      <td className="py-3 px-3 border border-slate-200 leading-relaxed">
-                        Digunakan untuk kejadian yang <strong>saling lepas / terpisah</strong> (tidak dapat terjadi secara bersamaan).
-                      </td>
-                    </tr>
+              <div className="p-4 sm:p-5 bg-white border-2 border-slate-200 rounded-2xl shadow-xs space-y-3">
+                <div className="flex items-center gap-2 font-extrabold text-slate-900 text-base font-candy">
+                  <ArrowRightLeft className="w-5 h-5 text-emerald-600" />
+                  <span>Tabel Perbandingan: Aturan Perkalian vs. Aturan Penjumlahan</span>
+                </div>
 
-                    <tr>
-                      <td className="py-3 px-3 font-bold bg-slate-50 border border-slate-200">
-                        Kata Kunci Penghubung
-                      </td>
-                      <td className="py-3 px-3 border border-slate-200 font-mono font-bold text-sky-800">
-                        "DAN"
-                      </td>
-                      <td className="py-3 px-3 border border-slate-200 font-mono font-bold text-pink-800">
-                        "ATAU"
-                      </td>
-                    </tr>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-800 font-extrabold border-b border-slate-300">
+                        <th className="py-2 px-3 border border-slate-200 w-1/4">Aspek Pembanding</th>
+                        <th className="py-2 px-3 border border-slate-200 w-3/8 text-sky-900 bg-sky-50/50">
+                          Aturan Perkalian
+                        </th>
+                        <th className="py-2 px-3 border border-slate-200 w-3/8 text-pink-900 bg-pink-50/50">
+                          Aturan Penjumlahan
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 text-slate-700">
+                      <tr>
+                        <td className="py-2.5 px-3 font-bold bg-slate-50 border border-slate-200">
+                          Sifat Kejadian
+                        </td>
+                        <td className="py-2.5 px-3 border border-slate-200 leading-relaxed">
+                          Digunakan untuk kejadian yang <strong>terjadi bersamaan</strong> atau{' '}
+                          <strong>berurutan</strong> (berpasangan secara simultan).
+                        </td>
+                        <td className="py-2.5 px-3 border border-slate-200 leading-relaxed">
+                          Digunakan untuk kejadian yang <strong>saling lepas / terpisah</strong> (tidak dapat terjadi secara bersamaan).
+                        </td>
+                      </tr>
 
-                    <tr>
-                      <td className="py-3 px-3 font-bold bg-slate-50 border border-slate-200">
-                        Operasi Matematika
-                      </td>
-                      <td className="py-3 px-3 border border-slate-200 font-mono text-sky-800 font-semibold leading-relaxed">
-                        Mengalikan setiap pilihan:
-                        <br />
-                        <strong className="text-sky-900 font-bold">m × n</strong> atau{' '}
-                        <strong className="text-sky-900 font-bold">n₁ × n₂ × ... × nₖ</strong>
-                      </td>
-                      <td className="py-3 px-3 border border-slate-200 font-mono text-pink-800 font-semibold leading-relaxed">
-                        Menjumlahkan setiap pilihan:
-                        <br />
-                        <strong className="text-pink-900 font-bold">m + n</strong> atau{' '}
-                        <strong className="text-pink-900 font-bold">n₁ + n₂ + ... + nₚ</strong>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                      <tr>
+                        <td className="py-2.5 px-3 font-bold bg-slate-50 border border-slate-200">
+                          Kata Kunci Penghubung
+                        </td>
+                        <td className="py-2.5 px-3 border border-slate-200 font-mono font-bold text-sky-800">
+                          "DAN"
+                        </td>
+                        <td className="py-2.5 px-3 border border-slate-200 font-mono font-bold text-pink-800">
+                          "ATAU"
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td className="py-2.5 px-3 font-bold bg-slate-50 border border-slate-200">
+                          Operasi Matematika
+                        </td>
+                        <td className="py-2.5 px-3 border border-slate-200 font-mono text-sky-800 font-semibold leading-relaxed">
+                          Mengalikan setiap pilihan:
+                          <br />
+                          <strong className="text-sky-900 font-bold">m × n</strong> atau{' '}
+                          <strong className="text-sky-900 font-bold">n₁ × n₂ × ... × nₖ</strong>
+                        </td>
+                        <td className="py-2.5 px-3 border border-slate-200 font-mono text-pink-800 font-semibold leading-relaxed">
+                          Menjumlahkan setiap pilihan:
+                          <br />
+                          <strong className="text-pink-900 font-bold">m + n</strong> atau{' '}
+                          <strong className="text-pink-900 font-bold">n₁ + n₂ + ... + nₚ</strong>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="pt-1 text-[11px] text-slate-400 italic text-right">
+                  Sumber: Modul Pembelajaran SMA Matematika Umum Kelas XII KD 3.3 (Kaidah Pencacahan), Kemendikbud 2020.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: Cara Menyusun Bilangan (Aturan Pengisian Tempat / Kotak Posisi) */}
+          {activeTab === 5 && (
+            <div
+              data-testid="filling-slots-section"
+              className="p-5 sm:p-6 bg-gradient-to-br from-[#FFFDF9] to-purple-50/50 border-2 border-purple-200/80 rounded-2xl shadow-xs space-y-4"
+            >
+              <div className="flex items-center gap-2 font-extrabold text-purple-950 text-base sm:text-lg font-candy">
+                <span className="w-7 h-7 rounded-full bg-purple-600 text-white text-xs flex items-center justify-center shrink-0">
+                  5
+                </span>
+                <span>Cara Menyusun Bilangan (Aturan Pengisian Tempat / Kotak Posisi)</span>
               </div>
 
-              <div className="pt-1 text-[11px] text-slate-400 italic text-right">
-                Sumber: Modul Pembelajaran SMA Matematika Umum Kelas XII KD 3.3 (Kaidah Pencacahan), Kemendikbud 2020.
+              <div className="pl-0 sm:pl-9 space-y-4">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  Untuk menyusun bilangan beberapa digit dari himpunan angka yang tersedia, gunakan metode{' '}
+                  <strong>Kotak Posisi (Filling Slots)</strong>. Setiap kotak mewakili satu posisi digit (misalnya{' '}
+                  <strong>Ratusan</strong>, <strong>Puluhan</strong>, <strong>Satuan</strong>) yang diisi secara bertahap lalu{' '}
+                  <strong>dikalikan</strong> menggunakan Aturan Perkalian.
+                </p>
+
+                {/* Langkah Demi Langkah 1: Tanpa Syarat Khusus */}
+                <div className="bg-white border-2 border-purple-200 rounded-xl p-4 space-y-3">
+                  <div className="text-xs font-extrabold text-purple-900 uppercase tracking-wide">
+                    Contoh Langkah 1: Menyusun Bilangan 3 Angka Berbeda (Tanpa Pengulangan)
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    Misal tersedia <strong>5 angka</strong>: <code className="px-1.5 py-0.5 bg-slate-100 rounded font-bold">{'{1, 2, 3, 4, 5}'}</code> untuk disusun menjadi bilangan ratusan (3 angka) <strong>yang berbeda</strong>:
+                  </p>
+
+                  {/* Visual Slot Boxes */}
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+                    <div className="p-2.5 rounded-xl bg-purple-50 border-2 border-purple-300">
+                      <div className="text-[10px] font-extrabold text-purple-700 uppercase">Kotak Ratusan</div>
+                      <div className="text-lg font-mono font-extrabold text-purple-950 my-0.5">5</div>
+                      <div className="text-[10px] text-slate-600">Semua 5 angka boleh dipilih</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-purple-50 border-2 border-purple-300">
+                      <div className="text-[10px] font-extrabold text-purple-700 uppercase">Kotak Puluhan</div>
+                      <div className="text-lg font-mono font-extrabold text-purple-950 my-0.5">4</div>
+                      <div className="text-[10px] text-slate-600">1 angka terpakai, sisa 4</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-purple-50 border-2 border-purple-300">
+                      <div className="text-[10px] font-extrabold text-purple-700 uppercase">Kotak Satuan</div>
+                      <div className="text-lg font-mono font-extrabold text-purple-950 my-0.5">3</div>
+                      <div className="text-[10px] text-slate-600">2 angka terpakai, sisa 3</div>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 bg-purple-50/70 rounded-lg border border-purple-100 text-xs font-mono font-bold text-purple-950 text-center">
+                    Banyak bilangan = 5 × 4 × 3 = 60 bilangan
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Catatan: Jika angka <strong>boleh berulang</strong>, banyak pilihan tiap kotak tidak berkurang (tetap 5 × 5 × 5 = 125 bilangan).
+                  </p>
+                </div>
+
+                {/* Langkah Demi Langkah 2: Dengan Syarat Khusus */}
+                <div className="bg-white border-2 border-emerald-200 rounded-xl p-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs font-extrabold text-emerald-900 uppercase tracking-wide">
+                      Contoh Langkah 2: Menyusun Bilangan dengan Syarat Khusus
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">
+                      Aturan Emas: Isi Kotak Bersyarat Dulu!
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    Dari angka <code className="px-1.5 py-0.5 bg-slate-100 rounded font-bold">{'{1, 2, 3, 4, 5}'}</code> disusun bilangan <strong>genap</strong> 3 angka berbeda:
+                  </p>
+
+                  <ol className="text-xs text-slate-700 space-y-1.5 list-decimal pl-5 leading-relaxed">
+                    <li>
+                      <strong>Langkah 1 — Isi Kotak Satuan terlebih dahulu:</strong> Syarat bilangan genap ditentukan oleh digit satuan, hanya boleh diisi <code className="font-bold">{'{2, 4}'}</code> ➔ <strong>2 pilihan</strong>.
+                    </li>
+                    <li>
+                      <strong>Langkah 2 — Isi Kotak Ratusan:</strong> Dari 5 angka tersedia, 1 angka sudah dipakai di satuan ➔ tersisa <strong>4 pilihan</strong>.
+                    </li>
+                    <li>
+                      <strong>Langkah 3 — Isi Kotak Puluhan:</strong> 2 angka sudah terpakai (di satuan dan ratusan) ➔ tersisa <strong>3 pilihan</strong>.
+                    </li>
+                  </ol>
+
+                  <div className="p-2.5 bg-emerald-50 rounded-lg border border-emerald-200 text-xs font-mono font-extrabold text-emerald-950 text-center">
+                    Total = 4 (Ratusan) × 3 (Puluhan) × 2 (Satuan) = 24 bilangan genap
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    <strong>Tips Syarat Nilai (misal &gt; 300):</strong> Mulailah dari <strong>Kotak Ratusan</strong> terlebih dahulu (angka ≥ 3 yaitu <code className="font-bold">{'{3, 4, 5}'}</code> = 3 pilihan), lalu lanjutkan ke Puluhan (4 pilihan) dan Satuan (3 pilihan) ➔ <code className="font-mono font-bold">3 × 4 × 3 = 36</code>.
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -506,7 +652,7 @@ export const PrerequisiteModal: React.FC<PrerequisiteModalProps> = ({
               {allTabsVisited ? (
                 <span className="text-emerald-700 font-bold flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5" />
-                  Semua 4 bagian materi telah dibaca!
+                  Semua {MATERIAL_TABS.length} bagian materi telah dibaca!
                 </span>
               ) : (
                 `Baca semua ${MATERIAL_TABS.length} tab materi untuk membuka akses misi`
@@ -535,7 +681,7 @@ export const PrerequisiteModal: React.FC<PrerequisiteModalProps> = ({
                 ? 'Akses seluruh misi dan kuis sudah terbuka di Peta Sirkuit.'
                 : allTabsVisited
                 ? 'Tekan tombol konfirmasi di samping untuk membuka Misi 1–4 & Kuis!'
-                : 'Klik & jelajahi keempat tab di atas terlebih dahulu agar tombol konfirmasi aktif.'}
+                : `Klik & jelajahi kelima tab di atas terlebih dahulu agar tombol konfirmasi aktif.`}
             </div>
             <button
               type="button"
